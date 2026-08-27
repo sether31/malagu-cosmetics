@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+::selection {
+  background-color: #0A0A0A;
+  color: #FFFFFF;
+}
+
+/* theme */
+@theme {
+  --font-serif: "Playfair Display", serif;
+  --font-sans: "Inter", sans-serif;
+
+  --color-primary: var(--color-val-primary);
+  --color-banner: var(--color-val-banner);
+  --color-btn: var(--color-val-btn);
+  --color-btnHover: var(--color-val-btnHover);
+  --color-bgColor: var(--color-val-bgColor);
+  --color-surface: var(--color-val-surface);
+}
+
+
+@layer theme {
+  :root {
+    --color-val-primary: #0A0A0A;       
+    --color-val-bgColor: #FFFFFF;      
+    --color-val-surface: #FAFAFA;      
+    --color-val-banner: #F6ECE6;        
+    --color-val-btn: #A56064;           
+    --color-val-btnHover: #8C4E52;   
+  }
+}
+
+/* container */
+@layer components {
+  .container-2xl {
+    @apply mx-auto px-8 max-w-[1540px];
+  }
+
+  .container-xl {
+    @apply mx-auto px-8 max-w-[1400px];
+  }
+
+  .container-lg {
+    @apply mx-auto px-8 max-w-[1200px];
+  }
+
+  .container-md {
+    @apply mx-auto px-8 max-w-[900px];
+  }
+
+  .container-sm {
+    @apply mx-auto px-8 max-w-[500px];
+  }
+}
+
+/* fonts */
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter/Inter-VariableFont_opsz,wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  src: url('/fonts/Playfair_Display/PlayfairDisplay-VariableFont_wght.ttf') format('truetype');
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+body {
+  @apply antialiased bg-bgColor text-primary font-sans;
+}
