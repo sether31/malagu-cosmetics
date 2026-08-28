@@ -17,6 +17,14 @@
   --color-btnHover: var(--color-val-btnHover);
   --color-bgColor: var(--color-val-bgColor);
   --color-surface: var(--color-val-surface);
+      
+  /* animation */
+  --animate-infinite-scroll: scroll 35s linear infinite;
+
+  @keyframes scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
 }
 
 
@@ -28,30 +36,30 @@
     --color-val-surface: #FAFAFA;      
     --color-val-banner: #F9F6F1;        
     --color-val-btn: #A56064;           
-    --color-val-btnHover: #8C4E52;   
+    --color-val-btnHover: #8C4E52; 
   }
 }
 
 /* container */
 @layer components {
   .container-2xl {
-    @apply mx-auto px-8 max-w-[1540px];
+    @apply mx-auto px-6 max-w-[1540px];
   }
 
   .container-xl {
-    @apply mx-auto px-8 max-w-[1400px];
+    @apply mx-auto px-6 max-w-[1400px];
   }
 
   .container-lg {
-    @apply mx-auto px-8 max-w-[1200px];
+    @apply mx-auto px-6 max-w-[1200px];
   }
 
   .container-md {
-    @apply mx-auto px-8 max-w-[900px];
+    @apply mx-auto px-6 max-w-[900px];
   }
 
   .container-sm {
-    @apply mx-auto px-8 max-w-[500px];
+    @apply mx-auto px-6 max-w-[500px];
   }
 }
 
@@ -73,6 +81,12 @@
 }
 
 
+.dither-bg {
+  background-color: #FAFAFA;
+  background-image: radial-gradient(#262626 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
 body {
-  @apply font-sans antialiased bg-bgColor text-primary;
+  @apply font-sans antialiased bg-surface text-primary;
 }
