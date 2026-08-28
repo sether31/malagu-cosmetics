@@ -11,6 +11,7 @@
   --font-sans: "Inter", sans-serif;
 
   --color-primary: var(--color-val-primary);
+  --color-pink: var(--color-val-pink);
   --color-banner: var(--color-val-banner);
   --color-btn: var(--color-val-btn);
   --color-btnHover: var(--color-val-btnHover);
@@ -21,10 +22,11 @@
 
 @layer theme {
   :root {
-    --color-val-primary: #0A0A0A;       
+    --color-val-primary: #0A0A0A;   
+    --color-val-pink: #8C4E52;    
     --color-val-bgColor: #FFFFFF;      
     --color-val-surface: #FAFAFA;      
-    --color-val-banner: #F6ECE6;        
+    --color-val-banner: #F9F6F1;        
     --color-val-btn: #A56064;           
     --color-val-btnHover: #8C4E52;   
   }
@@ -72,5 +74,5 @@
 
 
 body {
-  @apply antialiased bg-bgColor text-primary font-sans;
+  @apply font-sans antialiased bg-bgColor text-primary;
 }
