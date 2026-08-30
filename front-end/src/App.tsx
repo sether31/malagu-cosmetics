@@ -2,6 +2,7 @@ import Lenis from "lenis";
 import { useEffect } from "react";
 import { RouterProvider } from "react-router-dom";
 import { routes } from "./router/routes";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   useEffect(() => {
@@ -23,7 +24,10 @@ function App() {
   }, []);
 
   return (
-    <RouterProvider router={routes} />
+    <>
+      <RouterProvider router={routes} />
+      <ToastContainer />
+    </>
   )
 }
 
