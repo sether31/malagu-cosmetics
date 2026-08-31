@@ -41,7 +41,7 @@ const videoVariants = {
 
 const FruitySection = () => {
   return (
-    <div className="pt-20 pb-32 container-xl">
+    <div className="py-10 md:pt-20 md:pb-32 container-xl">
       <motion.div 
         variants={containerVariants}
         initial="hidden"
