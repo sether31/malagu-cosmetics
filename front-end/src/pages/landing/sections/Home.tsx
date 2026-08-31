@@ -42,7 +42,7 @@ const imageVariants = {
 
 const Home = () => {
   return (
-    <div className="pt-20 pb-32 container-xl">
+    <div className="py-10 md:pt-20 md:pb-32 container-xl">
       <motion.div 
         className="grid items-center grid-cols-1 gap-12 md:grid-cols-2"
         variants={containerVariants}
@@ -67,7 +67,7 @@ const Home = () => {
 
           <motion.p 
             variants={itemVariants}
-            className="max-w-md mt-3 text-base font-normal leading-relaxed text-primary/75 md:text-lg"
+            className="max-w-md mt-3 text-base leading-relaxed font-base text-primary/75 md:text-lg"
           >
             Weightless, breathable coverage that locks in place without ever feeling heavy or greasy.
           </motion.p>
