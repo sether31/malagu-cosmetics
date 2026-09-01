@@ -5,6 +5,8 @@ import { InfiniteSlider } from "../../components/InfiniteSlider";
 import FruitySection from "./sections/FruitySection";
 import JuicyCollection from "./sections/JuicyCollection";
 import Banner from "./sections/Banner";
+import Newsletter from "./sections/NewsLetter";
+import Footer from "../../components/Footer";
 
 const LandingPage = () => {
   return (
@@ -18,6 +20,8 @@ const LandingPage = () => {
       <FruitySection />
       <JuicyCollection />
       <Banner />
+      <Newsletter />
+      <Footer />
     </div>
   )
 }
