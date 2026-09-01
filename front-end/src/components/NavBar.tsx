@@ -8,6 +8,7 @@ import { IoMdClose } from "react-icons/io";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { MdKeyboardArrowDown } from "react-icons/md"; 
 import { api } from "../api/api";
+import { useCategoryStore } from "../store/useCategoryStore";
 
 const NavItem = ({ to, children }: { to: string; children: React.ReactNode }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -40,25 +41,24 @@ const NavItem = ({ to, children }: { to: string; children: React.ReactNode }) =>
 };
 
 const NavBar = () => {
+  // data
+  const { fetchCategories, categories: categoryData, isLoading } = useCategoryStore();
+
   // states
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchValue, setSearchValue] = useState<string>("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // shop dropdown states
-  const [menuData, setMenuData] = useState<Record<string, string[]>>({});
   const [isShopDropdownOpen, setIsShopDropdownOpen] = useState(false);
   const [isShopMobileExpanded, setIsShopMobileExpanded] = useState(false); 
 
   const isLabelFloating = isSearchFocused || searchValue.trim().length > 0;
   const navigate = useNavigate();
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchValue.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchValue.trim())}`);
-    }
-  };
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories])
 
   useEffect(() => {
     if (isMobileMenuOpen) {
@@ -68,19 +68,12 @@ const NavBar = () => {
     }
   }, [isMobileMenuOpen]);
 
-  // get categories
-  useEffect(() => {
-    const getCategories = async () => {
-      try {
-        const res = await api.get('/category/get-categories.php');
-        setMenuData(res.data)
-      } catch (error) {
-        console.log(`Failed to load product categories: ${error}`)
-      }
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchValue.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchValue.trim())}`);
     }
-
-    getCategories();
-  }, []);
+  };
 
   return (
     <>
@@ -109,7 +102,7 @@ const NavBar = () => {
               >
                 <div className="flex items-center gap-1 cursor-pointer">
                   <Link to="/shop">Shop All</Link>
-                  {Object.keys(menuData).length > 0 && (
+                  {categoryData.length > 0 && (
                     <MdKeyboardArrowDown
                       className={`text-lg duration-200 transition-transform ease-in-out ${isShopDropdownOpen ? 'rotate-180' : ''}`}
                     />
@@ -117,7 +110,7 @@ const NavBar = () => {
                 </div>
 
                 <AnimatePresence>
-                  {isShopDropdownOpen && Object.entries(menuData).length > 0 && (
+                  {isShopDropdownOpen && categoryData.length > 0 && (
                     <motion.div
                       initial={{y: 10, opacity: 0}}
                       animate={{y: 0, opacity: 1}}
@@ -126,21 +119,21 @@ const NavBar = () => {
                       className="absolute left-0 pt-4 top-full w-max"
                     >
                       <div className="flex gap-8 p-6 border border-gray-300 rounded-md bg-bgColor">
-                        {Object.entries(menuData).map(([category, subCategories]) => (
-                          <div key={category} className="flex flex-col gap-3 min-w-[120px]">
+                        {categoryData.map((categoryObj) => (
+                          <div key={categoryObj.name} className="flex flex-col gap-3 min-w-[120px]">
                             <Link
-                              to={`/shop?category=${encodeURIComponent(category)}`}
+                              to={`/shop?category=${encodeURIComponent(categoryObj.name)}`}
                               onClick={() => setIsShopDropdownOpen(true)}
                               className="text-base font-bold tracking-wide text-primary hover:underline"
                             >
-                              {category}
+                              {categoryObj.name}
                             </Link>
 
                             <ul className="flex flex-col gap-2 text-sm text-gray-700">
-                              {Array.isArray(subCategories) && subCategories.map((subCategory) => (
+                              {categoryObj.subCategories.map((subCategory) => (
                                 <li key={subCategory}>
                                   <Link
-                                    to={`/shop?category=${encodeURIComponent(category)}&sub=${encodeURIComponent(subCategory)}`}
+                                    to={`/shop?category=${encodeURIComponent(categoryObj.name)}&sub=${encodeURIComponent(subCategory)}`}
                                     onClick={() => setIsShopDropdownOpen(false)}
                                     className="hover:text-primary"
                                   >
@@ -157,14 +150,13 @@ const NavBar = () => {
                 </AnimatePresence>
               </div>
 
-              <NavItem to="/about">About Us</NavItem>
-              <NavItem to="/faqs">FAQs</NavItem>
+              <NavItem to="/frequently-asked-question">FAQs</NavItem>
               <NavItem to="/shade-guide">Shade Guide</NavItem>
 
               {/* logo */}
               <NavLink to="/" className="flex flex-col ml-10 font-serif tracking-tight text-center">
                 <span className="text-2xl font-black tracking-widest text-primary">MALAGU</span>
-                <span className="text-[10px] tracking-widest text-gray-500">COSMETICS</span>
+                <span className="text-[10px] tracking-widest text-gray-700">COSMETICS</span>
               </NavLink>
             </div>
 
@@ -183,7 +175,7 @@ const NavBar = () => {
 
                 <motion.label
                   htmlFor="search"
-                  className="absolute left-0 z-0 text-gray-900 pointer-events-none"
+                  className="absolute left-0 z-0 text-gray-800 pointer-events-none"
                   initial={false}
                   animate={{
                     y: isLabelFloating ? -18 : 0,
@@ -203,15 +195,15 @@ const NavBar = () => {
                     )}
                   </AnimatePresence>
                   <button type="submit" className="flex items-center focus:outline-none">
-                    <IoSearch className="text-2xl text-gray-900 cursor-pointer shrink-0" />
+                    <IoSearch className="text-2xl text-gray-800 cursor-pointer shrink-0" />
                   </button>
                 </div>
               </form>
 
-              <NavLink to="/account" className="pt-2 text-gray-900 transition-colors hover:text-gray-600">
+              <NavLink to="/account" className="pt-2 text-gray-800 transition-colors hover:text-gray-600">
                 <FaUser className="text-xl" />
               </NavLink>
-              <NavLink to="/cart" className="pt-2 text-gray-900 transition-colors hover:text-gray-600">
+              <NavLink to="/cart" className="pt-2 text-gray-800 transition-colors hover:text-gray-600">
                 <GiShoppingBag className="text-xl" />
               </NavLink>
             </div>
@@ -221,7 +213,7 @@ const NavBar = () => {
           {/* mobile */}
           <nav className="flex items-center justify-between gap-4 py-4 lg:hidden">
             <RxHamburgerMenu 
-              className="text-2xl text-gray-900 cursor-pointer" 
+              className="text-2xl text-gray-800 cursor-pointer" 
               onClick={() => setIsMobileMenuOpen(true)}
             />
             
@@ -230,7 +222,7 @@ const NavBar = () => {
               <span className="text-[10px] tracking-widest text-gray-500">COSMETICS</span>
             </NavLink>
 
-            <NavLink to="/cart" className="text-gray-900">
+            <NavLink to="/cart" className="text-gray-800">
               <GiShoppingBag className="text-2xl" />
             </NavLink>
           </nav>
@@ -260,7 +252,7 @@ const NavBar = () => {
               {/* close btn */}
               <div className="flex justify-end mb-8">
                 <IoMdClose 
-                  className="text-3xl text-gray-900 cursor-pointer" 
+                  className="text-3xl text-gray-800 cursor-pointer" 
                   onClick={() => setIsMobileMenuOpen(false)} 
                 />
               </div>
@@ -273,7 +265,7 @@ const NavBar = () => {
                 <div className="flex flex-col gap-3">
                   <div className="flex items-center justify-between cursor-pointer">
                     <NavLink to="/shop" onClick={() => setIsMobileMenuOpen(false)}>Shop All</NavLink>
-                    {Object.keys(menuData).length > 0 && (
+                    {categoryData.length > 0 && (
                       <MdKeyboardArrowDown 
                         className={`text-2xl transition-transform duration-300 ${isShopMobileExpanded ? 'rotate-180' : ''}`}
                         onClick={() => setIsShopMobileExpanded(!isShopMobileExpanded)} 
@@ -289,20 +281,20 @@ const NavBar = () => {
                         exit={{ height: 0, opacity: 0 }}
                         className="flex flex-col gap-5 pl-4 mt-2 overflow-hidden border-l-2 border-gray-200"
                       >
-                        {Object.entries(menuData).map(([category, subCategories]) => (
-                          <div key={category} className="flex flex-col gap-2">
+                        {categoryData.map((categoryObj) => (
+                          <div key={categoryObj.name} className="flex flex-col gap-2">
                             <Link
-                              to={`/shop?category=${encodeURIComponent(category)}`}
+                              to={`/shop?category=${encodeURIComponent(categoryObj.name)}`}
                               className="text-base font-semibold text-primary"
                               onClick={() => setIsMobileMenuOpen(false)}
                             >
-                              {category}
+                              {categoryObj.name}
                             </Link>
                             <ul className="flex flex-col gap-2 pl-2 text-sm text-gray-600">
-                              {subCategories.map((sub) => (
+                              {categoryObj.subCategories.map((sub) => (
                                 <li key={sub}>
                                   <Link
-                                    to={`/shop?category=${encodeURIComponent(category)}&sub=${encodeURIComponent(sub)}`}
+                                    to={`/shop?category=${encodeURIComponent(categoryObj.name)}&sub=${encodeURIComponent(sub)}`}
                                     onClick={() => setIsMobileMenuOpen(false)}
                                   >
                                     {sub}
@@ -317,8 +309,7 @@ const NavBar = () => {
                   </AnimatePresence>
                 </div>
 
-                <NavLink to="/about" onClick={() => setIsMobileMenuOpen(false)}>About Us</NavLink>
-                <NavLink to="/faqs" onClick={() => setIsMobileMenuOpen(false)}>FAQs</NavLink>
+                <NavLink to="/frequently-asked-question" onClick={() => setIsMobileMenuOpen(false)}>FAQs</NavLink>
                 <NavLink to="/shade-guide" onClick={() => setIsMobileMenuOpen(false)}>Shade Guide</NavLink>
                 
                 <hr className="my-2 border-gray-300" />

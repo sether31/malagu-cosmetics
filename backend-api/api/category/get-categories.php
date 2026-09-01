@@ -20,15 +20,23 @@ try {
     $subCategory = $row['sub_category'];
 
     if (!isset($categoriesMap[$category])) {
-      $categoriesMap[$category] = [];
+      $categoriesMap[$category] = [
+        'name' => $category,
+        'subCategories' => []
+      ];
     }
 
-    if ($subCategory && !in_array($subCategory, $categoriesMap[$category])) {
-      $categoriesMap[$category][] = $subCategory;
+    if ($subCategory && !in_array($subCategory, $categoriesMap[$category]['subCategories'])) {
+      $categoriesMap[$category]['subCategories'][] = $subCategory;
     }
   }
 
-  echo json_encode($categoriesMap, JSON_PRETTY_PRINT);
+  $finalCategories = array_values($categoriesMap);
+
+  echo json_encode([
+    "success" => true,
+    "data" => $finalCategories
+  ], JSON_PRETTY_PRINT);
 } catch (PDOException $e) {
   http_response_code(500);
   echo json_encode(["error" => "Database error: " . $e->getMessage()]);
