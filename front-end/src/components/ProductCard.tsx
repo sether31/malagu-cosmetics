@@ -36,7 +36,7 @@ const ProductCard = ({ product }: { product: ProductProps }) => {
         />
       </div>
 
-      <div className="flex flex-col justify-between flex-1 px-4 pt-2 pb-4">
+      <div className="flex flex-col justify-between flex-1 px-4 pt-2 pb-4 bg-surface">
         <Link
           to={`/product=${product.id}`}
           className="font-serif text-lg font-semibold leading-tight line-clamp-2"
