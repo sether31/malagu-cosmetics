@@ -33,7 +33,13 @@ const JuicyCollection = () => {
   useEffect(() => {
     const getProducts = async () => {
       try {
-        const res = await api.get('/products/get-products.php?sub_category=Lip Oil&limit=4');
+        const res = await api.get('/products/get-products.php', {
+          params: {
+            category: 'Lips',
+            sub_category: 'Lip Oil', 
+            limit: 4
+          }
+        });
         
         setProducts(res.data.data)
       } catch (error) {
@@ -46,7 +52,7 @@ const JuicyCollection = () => {
 
   
   return (
-    <div className="dither-bg">
+    <div className="">
       <div className="py-10 md:pt-20 md:pb-32 container-xl">
         <h1 className="font-serif text-3xl font-medium leading-tight text-center md:text-4xl">
           The Juicy Collections
