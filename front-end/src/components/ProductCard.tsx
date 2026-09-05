@@ -27,12 +27,12 @@ const ProductCard = ({ product }: { product: ProductProps }) => {
   const [activeVariant, setActiveVariant] = useState<ProductVariant>(product.variants[0]);
 
   return (
-    <div className="flex flex-col h-full gap-4 overflow-hidden border border-gray-300 rounded-lg shadow-sm">
-      <div className="w-full overflow-hidden bg-gray-100 shrink-0 max-h-64 aspect-5/4">
+    <div className="flex flex-col h-full gap-4 overflow-hidden">
+      <div className="w-full bg-surface shrink-0 max-h-74 aspect-5/4">
         <img 
           src={activeVariant.image_path} 
           alt={`${product.name} in ${activeVariant.color_name}`} 
-          className="object-contain w-full h-full p-4 mix-blend-multiply"
+          className="object-contain w-full h-full p-4 duration-300 ease-in-out mix-blend-multiply hover:scale-105"
         />
       </div>
 
@@ -66,7 +66,7 @@ const ProductCard = ({ product }: { product: ProductProps }) => {
 
         <Button 
           onClick={() => toast.success('Added to cart test.')}
-          className="items-center w-full gap-1 mt-6 bg-black"
+          className="items-center w-full gap-1 mt-6 "
         >
           <IoCartOutline size={16} />
           <span>Add to Cart</span>
