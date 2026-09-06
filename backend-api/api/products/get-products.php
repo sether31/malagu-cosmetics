@@ -1,61 +1,71 @@
 <?php
 require_once "../../config/Database.php";
 
-$baseUrl = $_ENV['BASE_URL'];
+$base_url = $_ENV['BASE_URL'];
 
 try {
-  $pdo = (new Database)->pdo;
-
-  // get url params
   $category = $_GET['category'] ?? null;
-  $subCategory = $_GET['sub_category'] ?? null;
-  $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : null;
+  $sub_category = $_GET['sub_category'] ?? null;
+  $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+  $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 8;
 
-  // where clause dynamic
-  $whereClauses = [];
+  if ($page < 1) $page = 1;
+  if ($limit < 1) $limit = 8;
+
+  $offset = ($page - 1) * $limit;
+
+  $pdo = (new Database())->pdo;
+
+  $where_clause = [];
   $params = [];
 
   if ($category) {
-    $whereClauses[] = "category = :category";
-    $params[':category'] = $category;
+    $where_clause[] = "category = :category";
+    $params[":category"] = $category;
   }
 
-  if ($subCategory) {
-    $whereClauses[] = "sub_category = :sub_category";
-    $params[':sub_category'] = $subCategory;
+  if ($sub_category) {
+    $where_clause[] = "sub_category = :sub_category";
+    $params[":sub_category"] = $sub_category;
   }
 
-  $whereSql = "";
-  if (count($whereClauses) > 0) {
-    $whereSql = "WHERE " . implode(" AND ", $whereClauses);
+  $where_sql = "";
+  if (count($where_clause) > 0) {
+    $where_sql = "WHERE " . implode(" AND ", $where_clause);
   }
 
-  $limitSql = "";
-  if ($limit && $limit > 0) {
-    $limitSql = "LIMIT $limit";
-  }
-
-
+  $stmt = $pdo->prepare("SELECT COUNT(*) FROM products_tb $where_sql");
+  $stmt->execute($params);
+  $total_products = (int)$stmt->fetchColumn();
+  $total_pages = $total_products > 0 ? (int)ceil($total_products / $limit) : 1;
 
   $stmt = $pdo->prepare(
-    "SELECT
+    "SELECT 
       p.id AS product_id, p.name, p.brand, p.category, p.sub_category, p.description, p.price,
       v.id AS variant_id, v.color_name, v.hex_code, v.image_path
     FROM (
       SELECT * FROM products_tb 
-      $whereSql 
-      $limitSql
-    ) p
-    LEFT JOIN product_variants_tb v ON p.id = v.product_id"
+      $where_sql
+      ORDER by id DESC
+      LIMIT :limit OFFSET :offset
+    ) p 
+    LEFT JOIN product_variants_tb v ON p.id = v.product_id
+    "
   );
 
-  $stmt->execute($params);
+  foreach ($params as $key => $val) {
+    $stmt->bindValue($key, $val);
+  }
+
+  $stmt->bindValue(":limit", $limit, PDO::PARAM_INT);
+  $stmt->bindValue(":offset", $offset, PDO::PARAM_INT);
+  $stmt->execute();
   $results = $stmt->fetchAll();
 
   $products = [];
 
   foreach ($results as $row) {
-    $pid = $row['product_id'];
+    $pid = $row["product_id"];
 
     if (!isset($products[$pid])) {
       $products[$pid] = [
@@ -70,13 +80,13 @@ try {
       ];
     }
 
-    if ($row['variant_id']) {
-      $products[$pid]['variants'][] = [
+    if ($row["variant_id"]) {
+      $products[$pid]["variants"][] = [
         "id" => $row['variant_id'],
         "product_id" => $pid,
         "color_name" => $row['color_name'],
         "hex_code" => $row['hex_code'],
-        "image_path" => $baseUrl . $row['image_path']
+        "image_path" => $base_url . $row['image_path']
       ];
     }
   }
@@ -85,7 +95,13 @@ try {
 
   echo json_encode([
     "success" => true,
-    "data" => $finalProducts
+    "data" => $finalProducts,
+    "pagination" => [
+      "currentPage" => $page,
+      "totalPages" => $total_pages,
+      "totalProducts" => $total_products,
+      "limit" => $limit
+    ]
   ]);
 } catch (\Throwable $th) {
   http_response_code(500);
