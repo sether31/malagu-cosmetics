@@ -15,6 +15,7 @@ html {
   --font-sans: "Inter", sans-serif;
 
   --color-primary: var(--color-val-primary);
+  --color-secondary: var(--color-val-secondary);
   --color-pink: var(--color-val-pink);
   --color-banner: var(--color-val-banner);
   --color-btn: var(--color-val-btn);
@@ -35,12 +36,12 @@ html {
 @layer theme {
   :root {
     --color-val-primary: #0A0A0A;   
+    --color-val-secondary: #2A0A0D;
     --color-val-pink: #8C4E52;    
     --color-val-bgColor: #FFFFFF;      
     --color-val-surface: #FAFAFA;      
     --color-val-banner: #F9F6F1;        
-    --color-val-btn: #A56064;           
-    --color-val-btnHover: #8C4E52; 
+    --color-val-btn: #2A0A0D;           
   }
 }
 
