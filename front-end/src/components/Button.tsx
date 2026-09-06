@@ -23,7 +23,7 @@ export const Button = ({className, variant = "primary", children, ...props}: But
   const baseClass = "text-primary px-8 py-3.5 rounded-sm font-medium tracking-wide transition-all duration-200 text-sm w-max active:scale-97 inline-flex justify-center whitespace-nowrap cursor-pointer"
 
   const variants = {
-    primary: "bg-btn hover:bg-btnHover text-white",
+    primary: "bg-btn hover:bg-btn/90 text-white",
     outline:"border border-primary/20 hover:border-primary"
   }
 
