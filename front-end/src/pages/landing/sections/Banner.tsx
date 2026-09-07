@@ -40,7 +40,7 @@ const imageVariants = {
 
 const Banner = () => {
   return (
-    <div className="bg-[#780303] text-white">
+    <div className="bg-secondary text-white">
       <motion.div 
         initial="hidden"
         whileInView="visible"
@@ -58,7 +58,7 @@ const Banner = () => {
 
           <motion.h1 
             variants={itemVariants}
-            className="font-sans text-3xl font-bold leading-tight md:text-4xl"
+            className="font-sans text-3xl font-bold leading-tight md:text-5xl"
           >
             Up to 30% OFF
           </motion.h1>
@@ -70,7 +70,7 @@ const Banner = () => {
           </motion.p>
 
           <motion.div variants={itemVariants} className="mt-6">
-            <Button to="/shop">
+            <Button to="/shop" className="bg-pink hover:bg-pink/90">
               Shop Collections
             </Button>
           </motion.div>
