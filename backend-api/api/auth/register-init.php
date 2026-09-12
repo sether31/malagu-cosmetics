@@ -1,6 +1,8 @@
 <?php
 
 require_once "../../config/Database.php";
+require_once "../../classes/Otp-Handler.php";
+require_once "../../classes/Mailer.php";
 
 $data = json_decode(file_get_contents("php://input"));
 $email = filter_var($data->email, FILTER_VALIDATE_EMAIL) ?? "";
@@ -24,18 +26,26 @@ try {
     exit;
   }
 
-  $hash_password = password_hash($password, PASSWORD_BCRYPT);
+  $otp_data = OtpHandler::generateOTP($email, "registration", 5);
 
+  // Check if OTP generation failed
+  if (!$otp_data) {
+    http_response_code(500);
+    echo json_encode([
+      "success" => false,
+      "message" => "Failed to generate OTP. Please try again."
+    ]);
+    exit();
+  }
 
-  $stmt = $pdo->prepare("INSERT INTO user_tb (email, password) VALUES (:email, :password)");
-  $stmt->execute([
-    ":email" => $email,
-    ":password" => $hash_password
-  ]);
+  // Now safe to access array keys
+  $otp_code = $otp_data['otp_code'];
+
+  Mailer::sendOTP($otp_code, $email, "", "registration", $otp_data["expires_at"]);
 
   echo json_encode([
     "success" => true,
-    "message" => "Registered user successfully!"
+    "message" => "OTP sent to your email."
   ]);
 } catch (\Throwable $e) {
   http_response_code(400);
