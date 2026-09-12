@@ -5,7 +5,7 @@ export const authService = {
     return api.post("/auth/register.php", credentials);
   },
   googleLogin: (code: string) => {
-    return api.post("/auth/google-login.php", { code }, {
+    return api.post("/auth/google-auth.php", { code }, {
       withCredentials: false 
     });
   }
