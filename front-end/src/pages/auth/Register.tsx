@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react"
+import { useGoogleLogin } from "@react-oauth/google"
 import { motion } from "motion/react"
 import { Button } from "../../components/Button"
 import { authService } from "../../services/authService"
@@ -9,6 +10,7 @@ import Input from "../../components/Input"
 import { FaCheck, FaRegEye, FaRegEyeSlash, FaXmark } from "react-icons/fa6"
 import { FcGoogle } from "react-icons/fc";
 import RegisterImage from "../../assets/auth/register.jpg"
+import PageLoader from "../../components/PageLoader"
 
 interface FormType {
   email: string
@@ -51,7 +53,7 @@ const imageVariants = {
     opacity: 1,
     x: 0,
     transition: {
-      duration: 1.5,
+      duration: 1,
       ease: [0.215, 0.61, 0.355, 1],
     },
   },
@@ -146,133 +148,178 @@ const Register = () => {
     }
   }
 
-  return (
-    <motion.section 
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="grid w-full min-h-screen grid-cols-1 md:grid-cols-2"
-    >
-      <motion.div variants={imageVariants} className="relative hidden overflow-hidden md:flex">
-        <img src={RegisterImage} alt="Makeup Image" className="absolute inset-0 object-cover w-full h-full"  />
-        <div className="absolute inset-0 bg-black/20"></div>
-      </motion.div>
+  const handleGoogleRegister = useGoogleLogin({
+    flow: "auth-code",
+    onSuccess: async (codeResponse) => {
+      setIsLoading(true);
 
-      <div className="flex flex-col justify-center max-w-sm gap-2 px-4 mx-auto">
-        <motion.div variants={itemVariants}>
-          <Link to="/" className="flex flex-col justify-center font-serif tracking-tight text-center">
-            <span className="text-xl font-black tracking-widest text-primary">MALAGU</span>
-            <span className="text-[10px] tracking-widest text-gray-700">COSMETICS</span>
-          </Link>
+      try {
+        const res = await authService.googleLogin(codeResponse.code);
+        toast.success(res.data.message)
+        navigate("/");
+      } catch (error) {
+        console.log('Failed to register google: ', error);
+        if (axios.isAxiosError(error) && error.response) {
+        toast.error(error.response.data.message || 'Failed to register google');
+      } else {
+        toast.error('Failed to register google');
+      }
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    onError: (error) => {
+      console.error(error);
+    }
+  });
+
+  return (
+    <>
+      <motion.section 
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="grid w-full min-h-screen grid-cols-1 md:grid-cols-2"
+      >
+        <motion.div variants={imageVariants} className="relative hidden overflow-hidden md:flex">
+          <img src={RegisterImage} alt="Makeup Image" className="absolute inset-0 object-cover w-full h-full" />
+          <div className="absolute inset-0 bg-black/30"></div>
+          
+          <div className="relative z-10 flex flex-col justify-end p-12 text-white">
+            <h2 className="font-serif text-3xl font-light tracking-wide">Make every look your own.</h2>
+            <p className="max-w-sm mt-2 text-sm font-light leading-relaxed text-gray-200">
+              Create your account and discover makeup designed to inspire, express, and elevate your everyday beauty.
+            </p>
+          </div>
         </motion.div>
 
-        <motion.h1 variants={itemVariants} className="font-serif text-4xl font-semibold leading-tight">Create Account</motion.h1>
-
-        <form onSubmit={handleSubmit} className="flex flex-col mt-2 space-y-6"> 
+        <div className="flex flex-col justify-center max-w-sm gap-2 px-4 mx-auto">
           <motion.div variants={itemVariants}>
-            <Input
-              style="w-sm max-w-sm"
-              label={<span>Email <span className="text-red-500">*</span></span>}
-              id="email"
-              name="email"
-              type="text"
-              value={form.email}
-              onChange={handleChange}
-              error={errors.email}
-              rightIcon={
-                form.email.length > 0 ? (
-                  errors.email ? <span className="text-red-500"><FaXmark /></span> : <span className="text-green-500"><FaCheck /></span>
-                ) : null
-              }
-            />
-          </motion.div>
-          
-          <motion.div variants={itemVariants}>
-            <Input
-              style="w-sm max-w-sm"
-              label={<span>Password <span className="text-red-500">*</span></span>}
-              id="password"
-              name="password"
-              type={showPassword ? "text" : "password"}
-              value={form.password}
-              onChange={handleChange}
-              error={errors.password}
-              rightIcon={
-                <div className="flex gap-1">
-                  {form.password.length > 0 ? (
-                    errors.password ? <span className="text-red-500"><FaXmark /></span> : <span className="text-green-500"><FaCheck /></span>
-                  ) : null}
-
-                  <button 
-                    type="button" 
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="cursor-pointer"
-                  >
-                    {showPassword ? <FaRegEye /> : <FaRegEyeSlash />}
-                  </button>
-                </div>
-              }
-            />
+            <Link to="/" className="flex flex-col justify-center font-serif tracking-tight text-center">
+              <span className="text-xl font-black tracking-widest text-primary">MALAGU</span>
+              <span className="text-[10px] tracking-widest text-gray-700">COSMETICS</span>
+            </Link>
           </motion.div>
 
-          <motion.div variants={itemVariants}>
-            <Input
-              style="w-sm max-w-sm"
-              label={<span>Confirm Password <span className="text-red-500">*</span></span>}
-              id="confirmPassword"
-              name="confirmPassword"
-              type={showConfirmPassword ? "text" : "password"}
-              value={form.confirmPassword}
-              onChange={handleChange}
-              error={errors.confirmPassword}
-              rightIcon={
-                <div className="flex gap-1">
-                  {form.confirmPassword.length > 0 ? (
-                    errors.confirmPassword ? <span className="text-red-500"><FaXmark /></span> : <span className="text-green-500"><FaCheck /></span>
-                  ) : null}
+          <motion.div variants={itemVariants} className="space-y-1">
+            <h1 className="font-serif text-3xl font-normal tracking-wide text-gray-900">Create Account.</h1>
+            <p className="text-xs font-light text-gray-500">Join us to save your favorite products.</p>
+          </motion.div>
 
+          <form onSubmit={handleSubmit} className="flex flex-col mt-2 space-y-4"> 
+            <motion.div variants={itemVariants}>
+              <Input
+                style="w-sm max-w-sm"
+                label={<span>Email <span className="text-red-500">*</span></span>}
+                id="email"
+                name="email"
+                type="text"
+                placeholder="Enter your email address"
+                value={form.email}
+                onChange={handleChange}
+                error={errors.email}
+                rightIcon={
+                  form.email.length > 0 ? (
+                    errors.email ? <span className="text-red-500"><FaXmark /></span> : <span className="text-green-500"><FaCheck /></span>
+                  ) : null
+                }
+              />
+            </motion.div>
+            
+            <motion.div variants={itemVariants}>
+              <Input
+                style="w-sm max-w-sm"
+                label={<span>Password <span className="text-red-500">*</span></span>}
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Must be at least 8 characters long"
+                value={form.password}
+                onChange={handleChange}
+                error={errors.password}
+                rightIcon={
                   <div className="flex gap-1">
+                    {form.password.length > 0 ? (
+                      errors.password ? <span className="text-red-500"><FaXmark /></span> : <span className="text-green-500"><FaCheck /></span>
+                    ) : null}
+
                     <button 
                       type="button" 
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() => setShowPassword(!showPassword)}
                       className="cursor-pointer"
                     >
-                      {showConfirmPassword ? <FaRegEye /> : <FaRegEyeSlash />}
+                      {showPassword ? <FaRegEye /> : <FaRegEyeSlash />}
                     </button>
                   </div>
-                </div>
-              }
-            />
+                }
+              />
+            </motion.div>
+
+            <motion.div variants={itemVariants}>
+              <Input
+                style="w-sm max-w-sm"
+                label={<span>Confirm Password <span className="text-red-500">*</span></span>}
+                id="confirmPassword"
+                name="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Confirm your password"
+                value={form.confirmPassword}
+                onChange={handleChange}
+                error={errors.confirmPassword}
+                rightIcon={
+                  <div className="flex gap-1">
+                    {form.confirmPassword.length > 0 ? (
+                      errors.confirmPassword ? <span className="text-red-500"><FaXmark /></span> : <span className="text-green-500"><FaCheck /></span>
+                    ) : null}
+
+                    <div className="flex gap-1">
+                      <button 
+                        type="button" 
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="cursor-pointer"
+                      >
+                        {showConfirmPassword ? <FaRegEye /> : <FaRegEyeSlash />}
+                      </button>
+                    </div>
+                  </div>
+                }
+              />
+            </motion.div>
+      
+            <motion.div variants={itemVariants}>
+              <Button type="submit" className="w-full rounded-md">
+                Create Account
+              </Button>
+            </motion.div>
+          </form>
+
+          <motion.div variants={itemVariants} className="flex items-center gap-4 my-4 text-sm">
+            <span className="flex-1 h-0.5 bg-gray-200"></span>
+            <span>Or SignUp With</span>
+            <span className="flex-1 h-0.5 bg-gray-200"></span>
           </motion.div>
-    
+
           <motion.div variants={itemVariants}>
-            <Button type="submit" className="w-full rounded-md">
-              Create Account
-            </Button>
+            <button 
+              onClick={() => handleGoogleRegister()}
+              className="flex items-center justify-center w-full gap-2 px-4 py-2 text-sm duration-300 ease-in-out bg-white border border-gray-300 rounded-md cursor-pointer active:scale-95 hover:bg-black/5 cursor-pointe"
+            >
+              <FcGoogle />
+              <span>Sign up with Google</span>
+            </button>
           </motion.div>
-        </form>
 
-        <motion.div variants={itemVariants} className="flex items-center gap-4 my-4 text-sm">
-          <span className="flex-1 h-0.5 bg-gray-200"></span>
-          <span>Or SignUp With</span>
-          <span className="flex-1 h-0.5 bg-gray-200"></span>
-        </motion.div>
-
-        <motion.div variants={itemVariants}>
-          <button 
-            className="flex items-center justify-center w-full gap-2 px-4 py-2 text-sm duration-300 ease-in-out bg-white border border-gray-300 rounded-md cursor-pointer active:scale-95 hover:bg-black/5 cursor-pointe"
-          >
-            <FcGoogle />
-            <span>Sign up with Google</span>
-          </button>
-        </motion.div>
-
-        <motion.p variants={itemVariants} className="flex justify-center gap-1 my-2 text-sm">
-          <span>Already have an account?</span> 
-          <Link to="/login" className="text-blue-500 duration-300 ease-in-out active:scale-95">Log in</Link>
-        </motion.p>
-      </div>
-    </motion.section>
+          <motion.p variants={itemVariants} className="flex justify-center gap-1 my-2 text-sm">
+            <span>Already have an account?</span> 
+            <Link to="/login" className="text-blue-500 duration-300 ease-in-out active:scale-95">Log in</Link>
+          </motion.p>
+        </div>
+      </motion.section>
+      
+      {isLoading && (
+        <PageLoader />
+      )}
+    </>
   )
 }
 
