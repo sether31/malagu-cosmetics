@@ -80,51 +80,56 @@ const Register = () => {
   const navigate = useNavigate();
   const auth = authService;
 
-
-  useEffect(() => {
+  const validateForm = (data: FormType) => {
     const validateErrors: FormErrorType = {};
-
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (form.email.length > 0 && !emailRegex.test(form.email)) {
+
+    // check Email
+    if (!data.email) {
+      validateErrors.email = "Email is required.";
+    } else if (!emailRegex.test(data.email)) {
       validateErrors.email = "Invalid email format.";
-    } else if (isSubmitted && !form.email) {
-      validateErrors.email = "Email is required."
     }
 
-    if (form.password.length > 0 && form.password.length < 8) {
+    // check Password
+    if (!data.password) {
+      validateErrors.password = "Password is required.";
+    } else if (data.password.length < 8) {
       validateErrors.password = "Password must be at least 8 characters.";
-    } else if (isSubmitted && !form.password) {
-      validateErrors.password = "Password is required."
     }
 
-    if (form.confirmPassword.length > 0 && form.password !== form.confirmPassword) {
+    // check Confirm Password
+    if (!data.confirmPassword) {
+      validateErrors.confirmPassword = "Confirm Password is required.";
+    } else if (data.password !== data.confirmPassword) {
       validateErrors.confirmPassword = "Passwords do not match.";
-    } else if (isSubmitted && !form.confirmPassword) {
-      validateErrors.confirmPassword = "Confirm Password is required."
     }
 
-    setErrors(validateErrors);
-  }, [form.email, form.password, form.confirmPassword, isSubmitted]);
+    return validateErrors;
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
-    setForm((prev) => ({
-      ...prev,
+    const updatedForm = {
+      ...form,
       [name]: value
-    }));
+    };
+
+    setForm(updatedForm);
+
+    setErrors(validateForm(updatedForm));
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitted(true);
 
-    if (!form.email || !form.password || !form.confirmPassword) {
-      toast.error("Please fill in all fields.");
-      return;
-    }
+    const validate = validateForm(form);
+    
+    setErrors(validate);
 
-    if (Object.keys(errors).length > 0) {
+    if (Object.keys(validate).length > 0) {
       toast.error("Please fix the errors before submitting.");
       return;
     }
@@ -139,10 +144,12 @@ const Register = () => {
       if (axios.isAxiosError(error) && error.response) {
         const backendData = error.response.data;
         toast.error(backendData.message || 'Register Failed');
-        setErrors((prevError) => ({
-          ...prevError,
-          email: backendData.message
-        }))
+        if (backendData.errors) {
+          setErrors((prev) => ({
+            ...prev,
+            ...backendData.errors
+          }));
+        }
       }
     } finally {
       setIsLoading(false);
@@ -378,7 +385,7 @@ const Register = () => {
           />
 
           <Button onClick={handleVerifyOtp} className="w-full rounded-md mt-4">
-            Verify & Create Account
+            Submit
           </Button>
           
           <button 
