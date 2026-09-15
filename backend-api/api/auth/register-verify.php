@@ -6,12 +6,25 @@ $data = json_decode(file_get_contents("php://input"), true);
 $email = filter_var($data['email'] ?? '', FILTER_VALIDATE_EMAIL);
 $password = $data['password'] ?? '';
 $otp = trim($data['otp'] ?? '');
+$errors = [];
 
-if (!$email || empty($password) || empty($otp)) {
-  http_response_code(400);
-  echo json_encode(["message" => "Email, password, and 6-digit OTP are required."]);
-  exit;
+if (!$email) {
+  $errors["email"] = "A valid email is required.";
 }
+if (empty($password)) {
+  $errors["password"] = "Password is required.";
+}
+
+if (!empty($errors)) {
+  http_response_code(400);
+  echo json_encode([
+    "success" => false,
+    "message" => "Please fill in all fields.",
+    "errors" => $errors
+  ]);
+  exit();
+}
+
 
 try {
   $pdo = (new Database())->pdo;
@@ -52,5 +65,9 @@ try {
   echo json_encode(["message" => "Registered Successfully!"]);
 } catch (PDOException $e) {
   http_response_code(500);
-  echo json_encode(["message" => "Database error: " . $e->getMessage()]);
+  echo json_encode([
+    "success" => false,
+    "message" => $e->getMessage()
+  ]);
+  exit;
 }
