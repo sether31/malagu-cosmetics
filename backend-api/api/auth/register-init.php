@@ -50,7 +50,13 @@ try {
     exit();
   }
 
-  Mailer::sendOTP($otp_data['otp_code'], $email, "", "registration", $otp_data["expires_at"]);
+  $sent = Mailer::sendOTP($otp_data['otp_code'], $email, "", "registration", $otp_data["expires_at"]);
+
+  if (!$sent) {
+    http_response_code(500);
+    echo json_encode(["success" => false, "message" => "Server failed to dispatch email."]);
+    exit;
+  }
 
   echo json_encode([
     "success" => true,
