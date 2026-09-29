@@ -5,8 +5,8 @@ require_once "../../classes/Otp-Handler.php";
 require_once "../../classes/Mailer.php";
 
 $data = json_decode(file_get_contents("php://input"));
-$email = filter_var($data->email, FILTER_VALIDATE_EMAIL) ?? "";
-$password = $data->password ?? "";
+$email = filter_var($data->email ?? "", FILTER_VALIDATE_EMAIL);
+$password = trim($data->password ?? "");
 $errors = [];
 
 if (!$email) {
@@ -26,20 +26,28 @@ if (!empty($errors)) {
   exit();
 }
 
-
 try {
   $pdo = (new Database())->pdo;
 
-  $check_email = $pdo->prepare("SELECT * FROM user_tb WHERE email = :email limit 1");
-  $check_email->execute([":email" => $email]);
+  $verify_password = password_verify($password, PASSWORD_BCRYPT);
 
-  if ($check_email->rowCount() > 0) {
+  $check_user = $pdo->prepare("SELECT * FROM user_tb WHERE email = :email LIMIT 1");
+  $check_user->execute([":email" => $email]);
+  $user = $check_user->fetch();
+
+  if (!$user) {
     http_response_code(400);
-    echo json_encode(["success" => false, "message" => "Email already exist", "errors" => ["email" => "Email already exist"]]);
+    echo json_encode(["success" => false, "message" => "Email doesn't exist.", "errors" => ["email" => "Email doesn't exist.",]]);
     exit;
   }
 
-  $otp_data = OtpHandler::generateOTP($email, "registration", 5);
+  if (!password_verify($password, $user["password"])) {
+    http_response_code(400);
+    echo json_encode(["success" => false, "message" => "Incorrect password.", "errors" => ["password" => "Incorrect password.",]]);
+    exit;
+  }
+
+  $otp_data = OtpHandler::generateOTP($email, "login", 5);
 
   if (!$otp_data) {
     http_response_code(500);
@@ -50,7 +58,13 @@ try {
     exit();
   }
 
-  Mailer::sendOTP($otp_data['otp_code'], $email, "", "registration", $otp_data["expires_at"]);
+  $sent = Mailer::sendOTP($otp_data["otp_code"], $email, "", "login", $otp_data["expires_at"]);
+
+  if (!$sent) {
+    http_response_code(500);
+    echo json_encode(["success" => false, "message" => "Server failed to dispatch email."]);
+    exit;
+  }
 
   echo json_encode([
     "success" => true,

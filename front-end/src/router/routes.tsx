@@ -28,5 +28,13 @@ export const routes = createBrowserRouter([
         <Register />
       </GoogleOAuthProvider>
     )
+  },
+  {
+    path: "/login",
+    element: (
+      <GoogleOAuthProvider clientId={`${import.meta.env.VITE_GOOGLE_CLIENT_ID}`}>
+        <Login  />
+      </GoogleOAuthProvider>
+    )
   }
 ]);
