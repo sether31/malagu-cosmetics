@@ -5,6 +5,7 @@ import Shop from "../pages/shop/Shop";
 import Register from "../pages/auth/Register";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import Login from "../pages/auth/Login";
+import ProductDetails from "../pages/product/ProductDetails";
 
 export const routes = createBrowserRouter([
   {
@@ -18,6 +19,10 @@ export const routes = createBrowserRouter([
       {
         path: "/shop", 
         element: <Shop />,
+      },
+      {
+        path: "product/:slug",
+        element: <ProductDetails />
       }
     ],
   },
