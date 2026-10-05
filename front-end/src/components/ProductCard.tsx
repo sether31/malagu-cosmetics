@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "./Button";
 import { toast } from "react-toastify";
-import { IoCartOutline } from "react-icons/io5";
+import { GiShoppingBag } from "react-icons/gi";
 
 export type ProductVariant = {
   id: number;
@@ -25,20 +25,21 @@ export type ProductProps = {
 
 const ProductCard = ({ product }: { product: ProductProps }) => {
   const [activeVariant, setActiveVariant] = useState<ProductVariant>(product.variants[0]);
-
+  const urlSlug = `/product/${product.id}-${product.name.toLowerCase().replace(/\s+/g, '-')}`;
+  
   return (
     <div className="flex flex-col h-full gap-4 overflow-hidden">
-      <div className="w-full bg-surface shrink-0 max-h-74 aspect-5/4">
+      <Link to={urlSlug} className="w-full bg-surface shrink-0 max-h-74 aspect-5/4">
         <img 
           src={activeVariant.image_path} 
           alt={`${product.name} in ${activeVariant.color_name}`} 
           className="object-contain w-full h-full p-4 duration-300 ease-in-out mix-blend-multiply hover:scale-105"
         />
-      </div>
+      </Link>
 
       <div className="flex flex-col justify-between flex-1 px-4 pt-2 pb-4 bg-surface">
         <Link
-          to={`/product=${product.id}`}
+          to={urlSlug}
           className="font-serif text-lg font-semibold leading-tight line-clamp-2"
         >
           {product.name}
@@ -68,8 +69,8 @@ const ProductCard = ({ product }: { product: ProductProps }) => {
           onClick={() => toast.success('Added to cart test.')}
           className="items-center w-full gap-1 mt-6 "
         >
-          <IoCartOutline size={16} />
-          <span>Add to Cart</span>
+          <GiShoppingBag size={16} />
+          <span>Add to Bag</span>
         </Button>
       </div>
     </div>
