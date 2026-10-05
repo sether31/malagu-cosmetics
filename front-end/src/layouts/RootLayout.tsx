@@ -1,16 +1,16 @@
 import { Outlet, useLocation } from 'react-router-dom'
 import NavBar from '../components/NavBar'
 import Footer from '../components/Footer'
-import { useEffect } from 'react';
+import { useLayoutEffect } from 'react';
 
 export default function RootLayout() {
   const { pathname } = useLocation();
-  
-  useEffect(() => {
+
+  useLayoutEffect(() => {
     window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: "instant", 
+    top: 0,
+    left: 0,
+    behavior: 'instant',
     });
   }, [pathname]);
 
