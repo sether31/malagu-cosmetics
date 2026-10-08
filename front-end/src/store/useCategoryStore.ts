@@ -9,6 +9,7 @@ export interface Category {
 interface CategoryStore {
   categories: Category[];
   isLoading: boolean;
+  fetchCategories: () => void;
 }
 
 export const useCategoryStore = create<CategoryStore>((set, get) => ({
