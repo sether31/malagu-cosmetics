@@ -29,6 +29,17 @@ const ProductCard = ({ product }: { product: ProductProps }) => {
   const urlSlug = `/product/${product.id}-${product.name.toLowerCase().replace(/\s+/g, '-')}`;
 
   const { addToCart } = useCart();
+
+  const handleAddToCart = () => {
+    const result = addToCart(product, activeVariant, 1);
+
+    if(!result.success) {
+      toast.error(result.message);
+      return;
+    }
+
+    toast.success(result.message);
+  }
   
   return (
     <div className="flex flex-col h-full gap-4 overflow-hidden">
@@ -69,10 +80,7 @@ const ProductCard = ({ product }: { product: ProductProps }) => {
         </p>
 
         <Button 
-          onClick={() => {
-            addToCart(product, activeVariant, 1);
-            toast.success("Added to bag successfully!");
-          }}
+          onClick={() => handleAddToCart()}
           className="items-center w-full gap-1 mt-6 "
         >
           <GiShoppingBag size={16} />
