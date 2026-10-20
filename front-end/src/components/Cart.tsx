@@ -27,7 +27,7 @@ const CartItem = ({
   removeFromCart
 }: CartItemProps) => {
   
-  const [localQty, setLocalQty] = useState(quantity.toString());
+  const [localQty, setLocalQty] = useState<string>(quantity.toString());
 
   useEffect(() => {
     setLocalQty(quantity.toString());
@@ -37,7 +37,7 @@ const CartItem = ({
     const val = e.target.value;
     setLocalQty(val); 
 
-    const parsed = parseInt(val);
+    const parsed = parseInt(val, 10);
     if (!isNaN(parsed) && parsed >= 1 && parsed <= 100) {
       updateQuantity(cartItemId, parsed);
     }
@@ -51,7 +51,10 @@ const CartItem = ({
     } else if (parsed > 100) {
       setLocalQty("100");
       updateQuantity(cartItemId, 100);
-      toast.error("You've reached the maximum limit of 100 for this item");
+      toast.warn("You've reached the maximum limit of 100 for this item");
+    } else {
+      setLocalQty(parsed.toString());
+      updateQuantity(cartItemId, parsed);
     }
   };
 
@@ -178,7 +181,7 @@ const Cart = ({ setIsCartOpen }: CartProps) => {
         </button>
       </div>
 
-      <div className="flex-1 p-6 overflow-y-auto scrollbar-thumb-primary">
+      <div className="flex-1 min-h-0 p-6 overflow-y-auto overscroll-contain scrollbar-thumb-primary">
         {cart.length === 0 ? (
           <div className="flex items-center justify-center gap-2 text-xl text-gray-900">
             <GiShoppingBag className="text-xl" />

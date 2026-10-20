@@ -7,8 +7,8 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { IoMdClose } from "react-icons/io";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { MdKeyboardArrowDown } from "react-icons/md"; 
-import { api } from "../api/api";
 import { useCategoryStore } from "../store/useCategoryStore";
+import Cart from "./Cart";
 
 const NavItem = ({ to, children }: { to: string; children: React.ReactNode }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -42,12 +42,13 @@ const NavItem = ({ to, children }: { to: string; children: React.ReactNode }) =>
 
 const NavBar = () => {
   // data
-  const { fetchCategories, categories: categoryData, isLoading } = useCategoryStore();
+  const { fetchCategories, categories: categoryData } = useCategoryStore();
 
   // states
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchValue, setSearchValue] = useState<string>("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
   
   // shop dropdown states
   const [isShopDropdownOpen, setIsShopDropdownOpen] = useState(false);
@@ -200,12 +201,12 @@ const NavBar = () => {
                 </div>
               </form>
 
-              <NavLink to="/account" className="pt-2 text-gray-800 transition-colors hover:text-gray-600">
+              <NavLink to="/account" className="pt-2 text-gray-800 transition-colors cursor-pointer hover:text-gray-900">
                 <FaUser className="text-xl" />
               </NavLink>
-              <NavLink to="/cart" className="pt-2 text-gray-800 transition-colors hover:text-gray-600">
+              <button onClick={() => setIsCartOpen(!isCartOpen)} className="pt-2 text-gray-800 transition-colors cursor-pointer hover:text-gray-900">
                 <GiShoppingBag className="text-xl" />
-              </NavLink>
+              </button>
             </div>
           </nav>
 
@@ -222,9 +223,9 @@ const NavBar = () => {
               <span className="text-[10px] tracking-widest text-gray-500">COSMETICS</span>
             </NavLink>
 
-            <NavLink to="/cart" className="text-gray-800">
-              <GiShoppingBag className="text-2xl" />
-            </NavLink>
+            <button onClick={() => setIsCartOpen(!isCartOpen)} className="pt-2 text-gray-800 transition-colors cursor-pointer hover:text-gray-600">
+              <GiShoppingBag className="text-xl" />
+            </button>
           </nav>
         </div>
       </header>
@@ -318,6 +319,31 @@ const NavBar = () => {
                   <FaUser /> Account
                 </NavLink>
               </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isCartOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              onClick={() => setIsCartOpen(false)}
+              className="fixed inset-0 z-40 bg-black/40" 
+            />
+
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "tween", duration: 0.3 }}
+              className="fixed top-0 right-0 z-50 h-screen"
+            >
+              <Cart setIsCartOpen={setIsCartOpen} />
             </motion.div>
           </>
         )}
