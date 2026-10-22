@@ -1,7 +1,7 @@
 <?php
 
 require_once "../../config/Database.php";
-require_once "../../classes/Otp-Handler.php";
+require_once "../../classes/OtpHandler.php";
 require_once "../../classes/Mailer.php";
 
 $data = json_decode(file_get_contents("php://input"));

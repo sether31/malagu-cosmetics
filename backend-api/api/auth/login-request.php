@@ -1,7 +1,7 @@
 <?php
 
 require_once "../../config/Database.php";
-require_once "../../classes/Otp-Handler.php";
+require_once "../../classes/OtpHandler.php";
 require_once "../../classes/Mailer.php";
 
 $data = json_decode(file_get_contents("php://input"));
@@ -29,11 +29,12 @@ if (!empty($errors)) {
 try {
   $pdo = (new Database())->pdo;
 
-  $verify_password = password_verify($password, PASSWORD_BCRYPT);
-
   $check_user = $pdo->prepare("SELECT * FROM user_tb WHERE email = :email LIMIT 1");
   $check_user->execute([":email" => $email]);
   $user = $check_user->fetch();
+
+
+  $verify_password = password_verify($password, $user["password"]);
 
   if (!$user) {
     http_response_code(400);
@@ -47,7 +48,7 @@ try {
     exit;
   }
 
-  $otp_data = OtpHandler::generateOTP($email, "login", 5);
+  $otp_data = OtpHandler::generateOTP($email, "login", 6);
 
   if (!$otp_data) {
     http_response_code(500);

@@ -1,6 +1,6 @@
 <?php
 require_once "../../config/Database.php";
-require_once "../jwt/Jwt-Handler.php";
+require_once "../../classes/JwtHandler.php";
 
 $data = json_decode(file_get_contents("php://input"));
 $code = $data->code ?? "";
