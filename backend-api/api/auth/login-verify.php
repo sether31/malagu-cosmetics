@@ -1,5 +1,6 @@
 <?php
 require_once "../../config/Database.php";
+require_once "../../classes/JwtHandler.php";
 
 $data = json_decode(file_get_contents("php://input"));
 $email = filter_var($data->email ?? "", FILTER_VALIDATE_EMAIL);
@@ -44,18 +45,18 @@ try {
   }
 
   $stmt = $pdo->prepare("SELECT * FROM user_tb WHERE email = :email LIMIT 1");
-  $stmt->execute();
+  $stmt->execute([":email" => $email]);
   $user = $stmt->fetch();
 
 
   $jwt = new JwtHandler($_ENV["JWT_SECRET_KEY"]);
-  $token = $jwt->generateToken($user_id);
+  $token = $jwt->generateToken($user["user_id"]);
 
   setcookie("refresh_token", $token["refresh_token"], time() + 120, "/", "", false, true);
 
   echo json_encode([
     "success" => true,
-    "message" => $message,
+    "message" => "Login Successfully!",
     "access_token" => $token["access_token"]
   ]);
 } catch (PDOException $e) {

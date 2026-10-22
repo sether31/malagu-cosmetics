@@ -8,7 +8,7 @@ class OtpHandler
 {
   public static function generateOTP($user_email, $purpose, $expiry_min = 5)
   {
-    $otp_code = random_int(000000, 999999);
+    $otp_code = random_int(111111, 999999);
     $expires_at = date("Y:m:d H:i:s", strtotime("+$expiry_min minutes"));
 
     try {

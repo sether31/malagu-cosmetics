@@ -1,17 +1,9 @@
 <?php
 
-require_once __DIR__ . "/../../vendor/autoload.php";
+require_once __DIR__ . "/../vendor/autoload.php";
 
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . "/../../");
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . "/../");
 $dotenv->load();
-
-$allowedOrigin = $_ENV['FRONTEND_URL'];
-
-header("Access-Control-Allow-Origin: {$allowedOrigin}");
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Credentials: true");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
