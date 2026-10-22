@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "./Button";
 import { toast } from "react-toastify";
 import { GiShoppingBag } from "react-icons/gi";
+import { useCart } from "../store/useCart";
 
 export type ProductVariant = {
   id: number;
@@ -26,6 +27,19 @@ export type ProductProps = {
 const ProductCard = ({ product }: { product: ProductProps }) => {
   const [activeVariant, setActiveVariant] = useState<ProductVariant>(product.variants[0]);
   const urlSlug = `/product/${product.id}-${product.name.toLowerCase().replace(/\s+/g, '-')}`;
+
+  const { addToCart } = useCart();
+
+  const handleAddToCart = () => {
+    const result = addToCart(product, activeVariant, 1);
+
+    if(!result.success) {
+      toast.error(result.message);
+      return;
+    }
+
+    toast.success(result.message);
+  }
   
   return (
     <div className="flex flex-col h-full gap-4 overflow-hidden">
@@ -66,7 +80,7 @@ const ProductCard = ({ product }: { product: ProductProps }) => {
         </p>
 
         <Button 
-          onClick={() => toast.success('Added to cart test.')}
+          onClick={() => handleAddToCart()}
           className="items-center w-full gap-1 mt-6 "
         >
           <GiShoppingBag size={16} />
