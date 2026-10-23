@@ -1,4 +1,4 @@
-import { api } from "../api/api"
+import { api, apiPrivate } from "../api/api"
 
 export const authService = {
   register: (credentials: object) => {
@@ -17,5 +17,8 @@ export const authService = {
     return api.post("/auth/google-auth.php", { code }, {
       withCredentials: false 
     });
+  },
+  refreshToken: async () => {
+    return apiPrivate.post("/auth/refresh-token.php")
   }
 }
