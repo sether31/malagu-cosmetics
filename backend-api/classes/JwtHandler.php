@@ -25,13 +25,13 @@ class JwtHandler
     $access_payload = [
       "iss" => $this->issuer,
       "user_id" => $user_id,
-      "exp" => $time + 30
+      "exp" => $time + 300
     ];
 
     $refresh_payload = [
       "iss" => $this->issuer,
       "user_id" => $user_id,
-      "exp" => $time + 120
+      "exp" => $time + 604800
     ];
 
     return [
@@ -58,7 +58,7 @@ class JwtHandler
       $access_payload = [
         "iss" => $this->issuer,
         "user_id" => $decoded->user_id,
-        "exp" => $time + 30
+        "exp" => $time + 300
       ];
 
       return JWT::encode($access_payload, $this->secret_key, "HS256");
