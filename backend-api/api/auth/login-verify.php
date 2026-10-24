@@ -52,7 +52,7 @@ try {
   $jwt = new JwtHandler($_ENV["JWT_SECRET_KEY"]);
   $token = $jwt->generateToken($user["user_id"]);
 
-  setcookie("refresh_token", $token["refresh_token"], time() + 120, "/", "", false, true);
+  setcookie("refresh_token", $token["refresh_token"], time() + 604800, "/", "", false, true);
 
   echo json_encode([
     "success" => true,
