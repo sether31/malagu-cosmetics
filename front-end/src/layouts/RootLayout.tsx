@@ -1,10 +1,16 @@
 import { Outlet, useLocation } from 'react-router-dom'
 import NavBar from '../components/NavBar'
 import Footer from '../components/Footer'
-import { useLayoutEffect } from 'react';
+import { useEffect, useLayoutEffect } from 'react';
+import { useAuthStore } from '../store/useAuthStore';
 
 export default function RootLayout() {
   const { pathname } = useLocation();
+  const { checkAuth } = useAuthStore();
+
+  useEffect(() => {
+    checkAuth(); 
+  }, [checkAuth]);
 
   useLayoutEffect(() => {
     window.scrollTo({
@@ -13,6 +19,7 @@ export default function RootLayout() {
     behavior: 'instant',
     });
   }, [pathname]);
+  
 
   return (
     <div>
