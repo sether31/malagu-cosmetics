@@ -3,9 +3,11 @@ import { useCart, type CartItem } from "../store/useCart";
 import { Button } from "./Button";
 import { useEffect, useState } from "react";
 import { MdDeleteOutline } from "react-icons/md";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { GiShoppingBag } from "react-icons/gi";
 import { toast } from "react-toastify";
+import { useAuthStore } from "../store/useAuthStore";
+import { LuLock } from "react-icons/lu";
 
 interface CartProps {
   setIsCartOpen: (isOpen: boolean) => void;
@@ -135,10 +137,30 @@ const CartItem = ({
 }
 
 const Cart = ({ setIsCartOpen }: CartProps) => {
-  const { cart, updateQuantity, removeFromCart } = useCart();
+  const { cart, updateQuantity, removeFromCart, checkout } = useCart();
   const [selectedItems, setSelectedItems] = useState<string[]>(
     cart.map((item) => item.cartItemId)
   );
+
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuthStore();
+
+  const checkoutCart = () => {
+    if(selectedItems.length === 0) {
+      toast.info("Select at least one item to proceed.");
+      return;
+    }
+
+    setIsCartOpen(false);
+
+    if(!isAuthenticated) {
+      navigate("/login");
+      return;
+    } 
+    
+    checkout(selectedItems);
+    toast.success("Order placed successfully!")
+  }
 
   useEffect(() => {
     setSelectedItems(prev => prev.filter(id => cart.some(item => item.cartItemId === id)));
@@ -194,18 +216,18 @@ const Cart = ({ setIsCartOpen }: CartProps) => {
               className={`block mb-6 ml-auto text-sm cursor-pointer w-max ${cart.length !== selectedItems.length ? "text-blue-500" : "text-red-900"}`}
             >
               {cart.length === selectedItems.length 
-                ? "Unselect All"
+                ? "Deselect All"
                 : "Select All"
               }
             </button>
 
             <div className="flex flex-col gap-6">
-              {cart.map((item) => (
-                <div className="flex items-center gap-2">
+              {cart.map((item, index) => (
+                <div key={index} className="flex items-center gap-2">
                   <input 
                     type="checkbox" 
                     checked={selectedItems.includes(item.cartItemId)}
-                    className="w-3 h-3 accent-primary shrink-0"
+                    className="w-3 h-3 accent-primary shrink-0 cursor-pointer"
                     onChange={() => toggleSelection(item.cartItemId)}
                   />
                   
@@ -231,12 +253,30 @@ const Cart = ({ setIsCartOpen }: CartProps) => {
           <span>₱{subtotal.toLocaleString()}</span>
         </div>
 
-        <Button 
-          className="w-full py-4 text-lg disabled:bg-gray-300 disabled:text-gray-700 disabled:cursor-not-allowed"
-          disabled={selectedItems.length === 0}
-        >
-          Proceed to Checkout
-        </Button>
+        {isAuthenticated ? (
+          <Button 
+            onClick={() => checkoutCart()}
+            className="w-full py-4 text-lg items-center flex gap-1 bg-primary disabled:cursor-not-allowed"
+          >
+            {selectedItems.length === 0 ? (
+              <>
+                <LuLock />
+                <span>Select Items to Proceed</span>
+              </>
+            ) : (
+              <span>Proceed to checkout</span>
+            )}
+            
+          </Button>
+        ) : (
+          <Button 
+            onClick={() => checkoutCart()}
+            className="w-full py-4 text-lg flex gap-1 bg-primary items-center"
+          >
+            <LuLock />
+            <span>Login to continue</span>
+          </Button>
+        )}
       </div>
       
     </div>

@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { ProductProps, ProductVariant } from "../components/ProductCard";
+import { apiPrivate } from "../api/api";
 
 export interface CartItem {
   cartItemId: string; 
@@ -15,6 +16,10 @@ export interface CartStore {
   addToCart: (product: ProductProps, variant: ProductVariant, quantity: number) => { success: boolean; message: string };
   updateQuantity: (CartItemId: string, newQuantity: number) => void;
   removeFromCart: (CartItemId: string) => void;
+  checkout: (selectedItems: string[]) => void;
+  mergeCart: () => Promise<void>;
+  fetchCart: () => Promise<void>;
+  clearCart: () => void;
 }
 
 
@@ -23,6 +28,7 @@ export const useCart = create<CartStore>()(
     (set, get) => ({
       cart: [],
       isLoading: false,
+
       addToCart: (product, variant, quantity) => {
         set({ isLoading: true });
         const currentCart = get().cart;
@@ -65,6 +71,7 @@ export const useCart = create<CartStore>()(
           message: "Added to bag successfully!"
         }
       },
+
       updateQuantity: (cartItemId, newQuantity) => {
         const cart = get().cart;
         set({
@@ -75,15 +82,50 @@ export const useCart = create<CartStore>()(
           ))
         })
       },
+      
       removeFromCart: (cartItemId) => {
         const cart = get().cart;
         const removeItem = cart.filter((item) => item.cartItemId !== cartItemId);
         set({cart: removeItem})
-      }
+      },
+
+      checkout: (selectedItems) => {
+        set((state) => ({
+          cart: state.cart.filter((item) => !selectedItems.includes(item.cartItemId))
+        }));
+      },
+
+      mergeCart: async () => {
+        const currentCart = get().cart;
+        if(currentCart.length === 0) return;
+
+        try {
+          await apiPrivate.post("/cart/merge-cart.php", { cart: currentCart });
+
+          get().clearCart();
+          await get().fetchCart();
+        } catch (error) {
+          console.error("Failed to sync guest cart with database:", error);
+        }
+      },
+
+      fetchCart: async() => {
+        try {
+          const res = await apiPrivate.get("/cart/get-cart.php");
+          if(res.data.success) {
+            set({ cart: res.data.cart });
+          }
+        } catch (error) {
+          console.error("Failed to fetch server cart:", error);
+        }
+      },
+      
+      clearCart: () => set({ cart: [] })
     }),
     {
       name: "malagu-cart",
       partialize: (state) => ({ cart: state.cart })
     }
-  )
+  ),
+  
 )
