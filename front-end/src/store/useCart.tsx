@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { ProductProps, ProductVariant } from "../components/ProductCard";
 import { apiPrivate } from "../api/api";
+import { useAuthStore } from "./useAuthStore";
 
 export interface CartItem {
   cartItemId: string; 
@@ -13,7 +14,7 @@ export interface CartItem {
 export interface CartStore {
   cart: CartItem[];
   isLoading: boolean;
-  addToCart: (product: ProductProps, variant: ProductVariant, quantity: number) => { success: boolean; message: string };
+  addToCart: (product: ProductProps, variant: ProductVariant, quantity: number) => Promise<{ success: boolean, message: string }>;
   updateQuantity: (CartItemId: string, newQuantity: number) => void;
   removeFromCart: (CartItemId: string) => void;
   checkout: (selectedItems: string[]) => void;
@@ -29,8 +30,31 @@ export const useCart = create<CartStore>()(
       cart: [],
       isLoading: false,
 
-      addToCart: (product, variant, quantity) => {
+      addToCart: async (product, variant, quantity) => {
         set({ isLoading: true });
+        const isAuthenticated = useAuthStore.getState().isAuthenticated;
+
+        if(isAuthenticated) {
+          try {
+            const res = await apiPrivate.post("/cart/add-cart.php", {
+              variant_id: variant.id,
+              quantity: quantity
+            });
+
+            if(res.data.success) {
+              await get().fetchCart();
+              set({ isLoading: false });
+              return {
+                success: true,
+                message: res.data.message
+              }
+            }
+          } catch (error) {
+            set({ isLoading: false });
+            return { success: false, message: "Failed to add item to server cart." };
+          }
+        }
+
         const currentCart = get().cart;
         const cartItemId = `${product.id}-${variant.id}`;
         const existingItem = currentCart.find((item) => item.cartItemId === cartItemId);
