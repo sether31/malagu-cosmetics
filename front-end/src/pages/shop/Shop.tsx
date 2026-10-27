@@ -94,9 +94,9 @@ const Shop = () => {
           className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
         >
           {products.length > 0 ? (
-            products.map((product) => (
+            products.map((product, index) => (
               <motion.div 
-                key={`${category}-${subCategory}-${currentPage}`}
+                key={`${index}-${category}-${subCategory}-${currentPage}`}
                 variants={cardVariants}
               >
                 <ProductCard product={product} />
