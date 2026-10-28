@@ -23,6 +23,7 @@ export interface CartStore {
   clearCart: () => void;
 }
 
+const itemTimers: Record<string, NodeJS.Timeout> = {};
 
 export const useCart = create<CartStore>()(
   persist(
@@ -96,7 +97,9 @@ export const useCart = create<CartStore>()(
         }
       },
 
-      updateQuantity: (cartItemId, newQuantity) => {
+      updateQuantity: async (cartItemId, newQuantity) => {
+        const isAuthenticated = useAuthStore.getState().isAuthenticated;
+
         const cart = get().cart;
         set({
           cart: cart.map((item) => (
@@ -105,8 +108,34 @@ export const useCart = create<CartStore>()(
             : item
           ))
         })
+
+        if(!isAuthenticated) return;
+
+        if (itemTimers[cartItemId]) {
+          clearTimeout(itemTimers[cartItemId]);
+        }
+
+        itemTimers[cartItemId] = setTimeout(async () => {
+          const currentItem = get().cart.find((i) => i.cartItemId === cartItemId);
+          const finalQuantity = currentItem ? currentItem.quantity : newQuantity;
+
+          try {
+            const res = await apiPrivate.post("/cart/update-cart.php", {
+              cart_item_id: cartItemId,
+              quantity: finalQuantity
+            });
+
+            if(res.data.success) {
+              await get().fetchCart();
+            }
+            return;
+          } catch (error) {
+            console.error("Failed to update quantity on server:", error);
+            return;
+          }
+        }, 500)
       },
-      
+
       removeFromCart: (cartItemId) => {
         const cart = get().cart;
         const removeItem = cart.filter((item) => item.cartItemId !== cartItemId);
