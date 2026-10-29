@@ -131,15 +131,32 @@ export const useCart = create<CartStore>()(
             return;
           } catch (error) {
             console.error("Failed to update quantity on server:", error);
-            return;
+          } finally {
+            delete itemTimers[cartItemId];
           }
         }, 500)
       },
 
-      removeFromCart: (cartItemId) => {
+      removeFromCart: async (cartItemId) => {
+        const isAuthenticated = useAuthStore.getState().isAuthenticated;
+
         const cart = get().cart;
         const removeItem = cart.filter((item) => item.cartItemId !== cartItemId);
         set({cart: removeItem})
+
+        if(!isAuthenticated) return;
+
+        try {
+          const res = await apiPrivate.post("/cart/remove-cart.php", {
+            cart_item_id: cartItemId
+          });
+
+          if(res.data.success) {
+            await get().fetchCart()
+          }
+        } catch (error) {
+          console.error("Failed to remove item on server cart:", error);
+        }
       },
 
       checkout: (selectedItems) => {
