@@ -16,6 +16,7 @@ export interface CartStore {
   isLoading: boolean;
   addToCart: (product: ProductProps, variant: ProductVariant, quantity: number) => Promise<{ success: boolean, message: string }>;
   updateQuantity: (CartItemId: string, newQuantity: number) => void;
+  updateVariant: (cartItemId: string, newVariantId: number) => void;
   removeFromCart: (CartItemId: string) => void;
   checkout: (selectedItems: string[]) => void;
   mergeCart: () => Promise<void>;
@@ -135,6 +136,75 @@ export const useCart = create<CartStore>()(
             delete itemTimers[cartItemId];
           }
         }, 500)
+      },
+
+      updateVariant: async (cartItemId, newVariantId) => {
+        const cart = get().cart;
+        const isAuthenticated = useAuthStore.getState().isAuthenticated;
+
+        const targetItem = cart.find((i) => i.cartItemId === cartItemId);
+        if(!targetItem) return;
+
+        const newVariant = targetItem.product.variants.find((v) => v.id === newVariantId);
+        if(!newVariant) return;
+
+        const newCartItemId = `${targetItem.product.id}-${newVariantId}`;
+
+        if(cartItemId === newCartItemId) return;
+
+        const existingTargetItem = cart.find((i) => i.cartItemId === newCartItemId);
+
+        if(existingTargetItem) {
+          const mergedQuantity = Math.min(existingTargetItem.quantity + targetItem.quantity, 100);
+
+          set({
+            cart: cart
+              .map((item) => 
+                item.cartItemId === newCartItemId
+                ? {...item, quantity: mergedQuantity}
+                : item
+              ).filter((i) => i.cartItemId !== cartItemId)
+          });
+
+          if(isAuthenticated) {
+            try {
+              await apiPrivate.post("/cart/update-variant.php", {
+                old_cart_item_id: cartItemId,
+                new_cart_item_id: newCartItemId,
+                action: "merge",
+                quantity: mergedQuantity
+              });
+
+              await get().fetchCart();
+            } catch (error) {
+              console.error("Failed to merge variants on server:", error);
+            }
+          }
+        } else {
+          set({
+            cart: cart
+              .map((item) => 
+                item.cartItemId === cartItemId
+                ? {...item, cartItemId: newCartItemId, selectedVariant: newVariant}
+                : item
+              )
+          });
+
+          if(isAuthenticated) {
+            try {
+              await apiPrivate.post("/cart/update-variant.php", {
+                old_cart_item_id: cartItemId,
+                new_cart_item_id: newCartItemId,
+                action: "swap",
+                quantity: targetItem.quantity
+              });
+
+              await get().fetchCart();
+            } catch (error) {
+              console.error("Failed to update variant on server:", error);
+            }
+          }
+        }
       },
 
       removeFromCart: async (cartItemId) => {
