@@ -229,10 +229,29 @@ export const useCart = create<CartStore>()(
         }
       },
 
-      checkout: (selectedItems) => {
+      checkout: async (selectedItems) => {
+        const isAuthenticated = useAuthStore.getState().isAuthenticated;
+
+        if (!selectedItems || selectedItems.length === 0) return;
+
         set((state) => ({
           cart: state.cart.filter((item) => !selectedItems.includes(item.cartItemId))
         }));
+
+        if (!isAuthenticated) return;
+
+        try {
+          const res = await apiPrivate.post("/cart/checkout-cart.php", {
+            cart_item_ids: selectedItems
+          });
+
+          if (res.data.success) {
+            await get().fetchCart(); 
+          }
+        } catch (error) {
+          console.error("Failed to process checkout on server:", error);
+          await get().fetchCart();
+        }
       },
 
       mergeCart: async () => {
