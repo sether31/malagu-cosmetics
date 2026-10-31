@@ -3,18 +3,15 @@ import { useCart, type CartItem } from "../store/useCart";
 import { Button } from "./Button";
 import { useEffect, useState } from "react";
 import { MdDeleteOutline } from "react-icons/md";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { GiShoppingBag } from "react-icons/gi";
 import { toast } from "react-toastify";
-
-interface CartProps {
-  setIsCartOpen: (isOpen: boolean) => void;
-}
+import { useAuthStore } from "../store/useAuthStore";
+import { LuLock } from "react-icons/lu";
+import { getImageUrl } from "../utils/getImageUrl";
 
 interface CartItemProps extends CartItem {
   setIsCartOpen: (isCartOpen: boolean) => void;
-  updateQuantity: (cartItemId: string, newQuantity: number) => void;
-  removeFromCart: (cartItemId: string) => void;
 }
 
 const CartItem = ({
@@ -23,11 +20,10 @@ const CartItem = ({
   product,
   selectedVariant,
   quantity,
-  updateQuantity,
-  removeFromCart
 }: CartItemProps) => {
   
   const [localQty, setLocalQty] = useState<string>(quantity.toString());
+  const { cart, updateQuantity, updateVariant, removeFromCart } = useCart();
 
   useEffect(() => {
     setLocalQty(quantity.toString());
@@ -58,6 +54,53 @@ const CartItem = ({
     }
   };
 
+  const handleVariantChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newVariantId = Number(e.target.value);
+    const newCartItemId = `${product.id}-${newVariantId}`;
+
+    if(selectedVariant.id === newVariantId) return;
+
+    const existingItem = cart.find((i) => i.cartItemId === newCartItemId);
+
+    if(existingItem) {
+      toast(
+        ({ closeToast }) => (
+          <div className="flex flex-col gap-2 p1">
+            <p className="text-sm font-medium text-gray-900">
+              This variant is already in your bag. Would you like to combine their quantities?
+            </p>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  updateVariant(cartItemId, newVariantId);
+                  closeToast();
+                }}
+                className="px-2 py-1 text-xs text-white rounded-md cursor-pointer bg-primary hover:opacity-90"
+              >
+                Yes, Merge
+              </button>
+              <button
+                onClick={() => closeToast()}
+                className="px-2 py-1 text-xs text-gray-700 bg-gray-200 rounded-md cursor-pointer hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ), {
+          position: "top-center",
+          autoClose: false,
+          closeOnClick: false,
+          draggable: false
+        }
+      );
+    } else {
+      updateVariant(cartItemId, newVariantId);
+    }
+
+  };
+
   return (
     <div className="flex w-full gap-4">
       <Link
@@ -66,7 +109,7 @@ const CartItem = ({
         className="w-20 h-20 p-1 overflow-hidden bg-gray-100 border shrink-0"
       >
         <img 
-          src={selectedVariant.image_path} 
+          src={getImageUrl(selectedVariant.image_path)} 
           className="object-cover w-full h-full duration-300 ease-in-out hover:scale-110"
           alt={product.name}
         />
@@ -85,6 +128,7 @@ const CartItem = ({
             name="variant" 
             id="variant"
             value={selectedVariant.id}
+            onChange={(e) => handleVariantChange(e)}
             className="p-1 mt-1 text-xs bg-white border rounded cursor-pointer" 
           >
             {product.variants.map((item) => (
@@ -134,11 +178,35 @@ const CartItem = ({
   )
 }
 
+interface CartProps {
+  setIsCartOpen: (isOpen: boolean) => void;
+}
+
 const Cart = ({ setIsCartOpen }: CartProps) => {
-  const { cart, updateQuantity, removeFromCart } = useCart();
+  const { cart, checkout } = useCart();
   const [selectedItems, setSelectedItems] = useState<string[]>(
     cart.map((item) => item.cartItemId)
   );
+
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuthStore();
+
+  const checkoutCart = () => {
+    if(isAuthenticated && selectedItems.length === 0) {
+      toast.info("Select at least one item to proceed.");
+      return;
+    }
+
+    setIsCartOpen(false);
+
+    if(!isAuthenticated) {
+      navigate("/login");
+      return;
+    } 
+    
+    checkout(selectedItems);
+    toast.success("Order placed successfully!")
+  }
 
   useEffect(() => {
     setSelectedItems(prev => prev.filter(id => cart.some(item => item.cartItemId === id)));
@@ -194,18 +262,18 @@ const Cart = ({ setIsCartOpen }: CartProps) => {
               className={`block mb-6 ml-auto text-sm cursor-pointer w-max ${cart.length !== selectedItems.length ? "text-blue-500" : "text-red-900"}`}
             >
               {cart.length === selectedItems.length 
-                ? "Unselect All"
+                ? "Deselect All"
                 : "Select All"
               }
             </button>
 
             <div className="flex flex-col gap-6">
-              {cart.map((item) => (
-                <div className="flex items-center gap-2">
+              {cart.map((item, index) => (
+                <div key={index} className="flex items-center gap-2">
                   <input 
                     type="checkbox" 
                     checked={selectedItems.includes(item.cartItemId)}
-                    className="w-3 h-3 accent-primary shrink-0"
+                    className="w-3 h-3 cursor-pointer accent-primary shrink-0"
                     onChange={() => toggleSelection(item.cartItemId)}
                   />
                   
@@ -215,8 +283,6 @@ const Cart = ({ setIsCartOpen }: CartProps) => {
                     product={item.product}
                     selectedVariant={item.selectedVariant}
                     quantity={item.quantity}
-                    updateQuantity={updateQuantity}
-                    removeFromCart={removeFromCart}
                   />
                 </div>
               ))}
@@ -231,12 +297,30 @@ const Cart = ({ setIsCartOpen }: CartProps) => {
           <span>₱{subtotal.toLocaleString()}</span>
         </div>
 
-        <Button 
-          className="w-full py-4 text-lg disabled:bg-gray-300 disabled:text-gray-700 disabled:cursor-not-allowed"
-          disabled={selectedItems.length === 0}
-        >
-          Proceed to Checkout
-        </Button>
+        {isAuthenticated ? (
+          <Button 
+            onClick={() => checkoutCart()}
+            className="flex items-center w-full gap-1 py-4 text-lg bg-primary disabled:cursor-not-allowed"
+          >
+            {selectedItems.length === 0 ? (
+              <>
+                <LuLock />
+                <span>Select Items to Proceed</span>
+              </>
+            ) : (
+              <span>Proceed to checkout</span>
+            )}
+            
+          </Button>
+        ) : (
+          <Button 
+            onClick={() => checkoutCart()}
+            className="flex items-center w-full gap-1 py-4 text-lg bg-primary"
+          >
+            <LuLock />
+            <span>Login to continue</span>
+          </Button>
+        )}
       </div>
       
     </div>

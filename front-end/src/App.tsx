@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { RouterProvider } from "react-router-dom";
 import { routes } from "./router/routes";
 import { ToastContainer } from "react-toastify";
+import { useCart } from "./store/useCart";
 
 function App() {
   useEffect(() => {
@@ -21,6 +22,12 @@ function App() {
     return () => {
       lenis.destroy();
     };
+  }, []);
+
+  const { fetchCart } = useCart();
+
+  useEffect(() => {
+    fetchCart();
   }, []);
 
   return (

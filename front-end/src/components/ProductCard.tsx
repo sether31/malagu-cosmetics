@@ -30,8 +30,8 @@ const ProductCard = ({ product }: { product: ProductProps }) => {
 
   const { addToCart } = useCart();
 
-  const handleAddToCart = () => {
-    const result = addToCart(product, activeVariant, 1);
+  const handleAddToCart = async () => {
+    const result = await addToCart(product, activeVariant, 1);
 
     if(!result.success) {
       toast.error(result.message);

@@ -12,6 +12,7 @@ import LoginImage from "../../assets/auth/login.jpg"
 import PageLoader from "../../components/PageLoader"
 import OTPInput from "react-otp-input"
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6"
+import { useCart } from "../../store/useCart"
 
 interface FormType {
   email: string
@@ -72,6 +73,8 @@ const Login = () => {
 
   const navigate = useNavigate();
   const auth = authService;
+
+  const { mergeCart } = useCart();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -145,7 +148,8 @@ const Login = () => {
 
       try {
         const res = await authService.googleLogin(codeResponse.code);
-        toast.success(res.data.message)
+        toast.success(res.data.message);
+        await mergeCart();
         navigate("/");
       } catch (error) {
         console.log('Failed to login google: ', error);
@@ -179,10 +183,14 @@ const Login = () => {
       });
       toast.success(res.data.message || "Login Successfully!");
 
+      await mergeCart();
+
       setForm({
         email: "",
         password: ""
       });
+      setOtp("");
+      navigate("/")
     } catch (error) {
       if(axios.isAxiosError(error) && error.response) {
         const backendData = error.response.data;
@@ -194,7 +202,6 @@ const Login = () => {
       setIsLoading(false);
     }
   } 
-
   return (
     <>
       {step === "login" ? (

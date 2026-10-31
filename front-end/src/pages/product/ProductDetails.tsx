@@ -57,7 +57,7 @@ const ProductDetails = () => {
   const existCartItem = cart.find((item) => item.cartItemId === currentVariantId);
   const existingQty = existCartItem ? existCartItem?.quantity : 0;
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if(!product || !activeVariant) return;
 
     if (existingQty >= 100) {
@@ -68,7 +68,7 @@ const ProductDetails = () => {
     const addableQty = 100 - existingQty;
 
     if(quantity > addableQty) {
-      const result = addToCart(product, activeVariant, addableQty);
+      const result = await addToCart(product, activeVariant, addableQty);
       if(result.success) {
         toast.warning(`Added ${addableQty} to bag. Reached maximum limit of 100 for this item.`);
         setQuantity(1);
@@ -76,7 +76,7 @@ const ProductDetails = () => {
       return;
     }
 
-    const result = addToCart(product, activeVariant, quantity);
+    const result = await addToCart(product, activeVariant, quantity);
 
     if(!result.success) {
       toast.error(result.message);
@@ -128,10 +128,10 @@ const ProductDetails = () => {
   );
 
   return (
-    <div className="pt-16 pb-20 container-xl">
+    <div className="py-20 container-xl">
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         {/* image */}
-        <div className="flex items-center justify-center p-0 mx-auto md:p-6 bg-surface w-full max-w-[320px] md:max-w-none md:w-full aspect-square">
+        <div className="flex items-center max-h-120 justify-center p-0 mx-auto md:p-6 bg-surface w-full max-w-[320px] md:max-w-none md:w-full aspect-square">
           {activeVariant && (
             <img
               src={activeVariant.image_path}
