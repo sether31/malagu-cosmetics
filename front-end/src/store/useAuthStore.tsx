@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { authService } from "../services/authService";
+import { useCart } from "./useCart";
 
 
 interface AuthState {
@@ -8,6 +9,7 @@ interface AuthState {
   isLoading: boolean;
   setAccessToken: (token: string | null) => void;
   checkAuth: () => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -37,6 +39,17 @@ export const useAuthStore = create<AuthState>((set) => ({
         isAuthenticated: false,
         isLoading: false,
       });
+    }
+  },
+
+  logout: async () => {
+    try {
+      await authService.logout();
+    } catch (error) {
+      console.error("Server logout failed:", error);
+    } finally {
+      set({ accessToken: null, isAuthenticated: false });
+      useCart.getState().clearCart();
     }
   }
 }))
