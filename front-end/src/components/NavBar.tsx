@@ -11,6 +11,7 @@ import { RiLogoutCircleLine } from "react-icons/ri";
 import { useCategoryStore } from "../store/useCategoryStore";
 import Cart from "./Cart";
 import { useAuthStore } from "../store/useAuthStore";
+import { toast } from "react-toastify";
 
 const NavItem = ({ to, children }: { to: string; children: React.ReactNode }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -44,6 +45,7 @@ const NavItem = ({ to, children }: { to: string; children: React.ReactNode }) =>
 
 const NavBar = () => {
   // data
+  const { isAuthenticated, logout } = useAuthStore();
   const { fetchCategories, categories: categoryData } = useCategoryStore();
 
   // states
@@ -81,7 +83,13 @@ const NavBar = () => {
     }
   };
 
-  const { isAuthenticated } = useAuthStore();
+  const handleLogout = async () => {
+    setIsAccountDropdownOpen(false);
+    setIsMobileMenuOpen(false);
+    await logout();
+    toast.success("Logged out successfully!");
+    navigate("/login");
+  };
 
   return (
     <>
@@ -236,13 +244,14 @@ const NavBar = () => {
                             <span>Profile</span>
                           </NavLink>
 
-                          <NavLink 
-                            to="/login"
+                          <button 
+                            type="button"
+                            onClick={() => handleLogout()}
                             className="flex items-center gap-1 text-sm tracking-wide text-gray-700 hover:text-gray-900"
                           >
                             <RiLogoutCircleLine />
                             <span>Logout</span>
-                          </NavLink>
+                          </button>
                         </div>
                       </motion.div>
                     )}
@@ -397,13 +406,13 @@ const NavBar = () => {
                                 <span>Profile</span>
                               </NavLink>
 
-                              <NavLink 
-                                to="/login"
+                              <button 
+                                onClick={() => handleLogout()}
                                 className="flex items-center gap-1 tracking-wide text-gray-700 hover:text-gray-900"
                               >
                                 <RiLogoutCircleLine />
                                 <span>Logout</span>
-                              </NavLink>
+                              </button>
                             </ul>
                           </motion.div>
                         )}
