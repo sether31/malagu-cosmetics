@@ -6,9 +6,12 @@ import { IoSearch } from "react-icons/io5";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { IoMdClose } from "react-icons/io";
 import { RxHamburgerMenu } from "react-icons/rx";
-import { MdKeyboardArrowDown } from "react-icons/md"; 
+import { MdAccountCircle, MdKeyboardArrowDown } from "react-icons/md"; 
+import { RiLogoutCircleLine } from "react-icons/ri";
 import { useCategoryStore } from "../store/useCategoryStore";
 import Cart from "./Cart";
+import { useAuthStore } from "../store/useAuthStore";
+import { toast } from "react-toastify";
 
 const NavItem = ({ to, children }: { to: string; children: React.ReactNode }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -42,17 +45,21 @@ const NavItem = ({ to, children }: { to: string; children: React.ReactNode }) =>
 
 const NavBar = () => {
   // data
+  const { isAuthenticated, logout } = useAuthStore();
   const { fetchCategories, categories: categoryData } = useCategoryStore();
 
   // states
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>("");
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
   
   // shop dropdown states
-  const [isShopDropdownOpen, setIsShopDropdownOpen] = useState(false);
-  const [isShopMobileExpanded, setIsShopMobileExpanded] = useState(false); 
+  const [isShopDropdownOpen, setIsShopDropdownOpen] = useState<boolean>(false);
+  const [isShopMobileExpanded, setIsShopMobileExpanded] = useState<boolean>(false); 
+
+  const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState<boolean>(false);
+  const [isAccountMobileExpanded, setIsAccountMobileExpanded] = useState<boolean>(false); 
 
   const isLabelFloating = isSearchFocused || searchValue.trim().length > 0;
   const navigate = useNavigate();
@@ -74,6 +81,14 @@ const NavBar = () => {
     if (searchValue.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchValue.trim())}`);
     }
+  };
+
+  const handleLogout = async () => {
+    setIsAccountDropdownOpen(false);
+    setIsMobileMenuOpen(false);
+    await logout();
+    toast.success("Logged out successfully!");
+    navigate("/login");
   };
 
   return (
@@ -201,9 +216,54 @@ const NavBar = () => {
                 </div>
               </form>
 
-              <NavLink to="/account" className="pt-2 text-gray-800 transition-colors cursor-pointer hover:text-gray-900">
-                <FaUser className="text-xl" />
-              </NavLink>
+              {isAuthenticated ? (
+                <div
+                  className="relative pt-2"
+                  onMouseEnter={() => setIsAccountDropdownOpen(true)}
+                  onMouseLeave={() => setIsAccountDropdownOpen(false)}
+                >
+                  <NavLink to="/account" className="text-gray-800 transition-colors cursor-pointer hover:text-gray-900">
+                    <FaUser className="text-xl" />
+                  </NavLink>
+
+                  <AnimatePresence>
+                    {isAccountDropdownOpen && (
+                      <motion.div
+                        initial={{y: 10, opacity: 0}}
+                        animate={{y: 0, opacity: 1}}
+                        exit={{y: 10, opacity: 0}}
+                        transition={{duration: 0.2}}
+                        className="absolute right-0 pt-4 top-full w-max"
+                      >
+                        <div className="flex flex-col gap-4 p-6 border border-gray-300 rounded-md bg-bgColor">
+                          <NavLink 
+                            to="/profile"
+                            className="flex items-center gap-1 text-sm tracking-wide text-gray-700 hover:text-gray-900"
+                          >
+                            <MdAccountCircle />
+                            <span>Profile</span>
+                          </NavLink>
+
+                          <button 
+                            type="button"
+                            onClick={() => handleLogout()}
+                            className="flex items-center gap-1 text-sm tracking-wide text-gray-700 hover:text-gray-900"
+                          >
+                            <RiLogoutCircleLine />
+                            <span>Logout</span>
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ) : (
+                <NavLink to="/login" className="pt-2 text-gray-800 transition-colors cursor-pointer hover:text-gray-900">
+                  <FaUser className="text-xl" />
+                </NavLink>
+              )}
+
+              
               <button onClick={() => setIsCartOpen(!isCartOpen)} className="pt-2 text-gray-800 transition-colors cursor-pointer hover:text-gray-900">
                 <GiShoppingBag className="text-xl" />
               </button>
@@ -297,6 +357,7 @@ const NavBar = () => {
                                   <Link
                                     to={`/shop?category=${encodeURIComponent(categoryObj.name)}&sub=${encodeURIComponent(sub)}`}
                                     onClick={() => setIsMobileMenuOpen(false)}
+                                    className="hover:text-gray-900"
                                   >
                                     {sub}
                                   </Link>
@@ -315,9 +376,52 @@ const NavBar = () => {
                 
                 <hr className="my-2 border-gray-300" />
                 
-                <NavLink to="/account" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3">
-                  <FaUser /> Account
-                </NavLink>
+                <div className="flex flex-col gap-6 text-lg tracking-wide">
+                  {isAuthenticated ? (
+                    <>
+                      <div 
+                        onClick={() => setIsAccountMobileExpanded(!isAccountMobileExpanded)} 
+                        className="flex items-center justify-between cursor-pointer"
+                      >
+                        <div>Account</div>
+                        <MdKeyboardArrowDown 
+                          className={`text-2xl transition-transform duration-300 ${isAccountMobileExpanded ? 'rotate-180' : ''}`}
+                        />
+                      </div>
+
+                      <AnimatePresence>
+                        {isAccountMobileExpanded && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0}}
+                            animate={{ height: "auto", opacity: 1}}
+                            exit={{ height: 0, opacity: 0}}
+                            className="flex flex-col gap-5 pl-4 mt-2 overflow-hidden border-l-2 border-gray-200"
+                          >
+                            <ul className="flex flex-col gap-2 pl-2 text-sm text-gray-600">
+                              <NavLink 
+                                to="/profile"
+                                className="flex items-center gap-1 tracking-wide text-gray-700 hover:text-gray-900"
+                              >
+                                <MdAccountCircle />
+                                <span>Profile</span>
+                              </NavLink>
+
+                              <button 
+                                onClick={() => handleLogout()}
+                                className="flex items-center gap-1 tracking-wide text-gray-700 hover:text-gray-900"
+                              >
+                                <RiLogoutCircleLine />
+                                <span>Logout</span>
+                              </button>
+                            </ul>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </>
+                  ) : (
+                    <NavLink to="/login" onClick={() => setIsMobileMenuOpen(false)}>Account</NavLink>
+                  )}
+                </div>
               </div>
             </motion.div>
           </>

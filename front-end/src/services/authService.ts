@@ -14,11 +14,12 @@ export const authService = {
     return api.post("/auth/login-verify.php", credentials);
   },
   googleLogin: (code: string) => {
-    return api.post("/auth/google-auth.php", { code }, {
-      withCredentials: false 
-    });
+    return api.post("/auth/google-auth.php", { code });
   },
-  refreshToken: async () => {
+  logout: () => {
+    return api.post("/auth/logout.php")
+  },
+  refreshToken: () => {
     return apiPrivate.post("/auth/refresh-token.php")
   }
 }
