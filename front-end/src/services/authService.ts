@@ -21,8 +21,5 @@ export const authService = {
   },
   refreshToken: () => {
     return apiPrivate.post("/auth/refresh-token.php");
-  },
-  getUserProfile: async () => {
-    return apiPrivate.post("/account/get-user.php");
   }
 }

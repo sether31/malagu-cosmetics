@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { authService } from "../services/authService";
 import { useCart } from "./useCart";
+import { userService } from "../services/userService";
 
 interface UserType {
   user_id: number;
@@ -42,7 +43,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         });
 
         try {
-          const userRes = await authService.getUserProfile();
+          const userRes = await userService.getUserProfile();
           if (userRes.data.success) {
             set({ user: userRes.data.user });
           }
