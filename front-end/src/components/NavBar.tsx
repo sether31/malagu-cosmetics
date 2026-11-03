@@ -237,11 +237,11 @@ const NavBar = () => {
                       >
                         <div className="flex flex-col gap-4 p-6 border border-gray-300 rounded-md bg-bgColor">
                           <NavLink 
-                            to="/profile"
+                            to="/account"
                             className="flex items-center gap-1 text-sm tracking-wide text-gray-700 hover:text-gray-900"
                           >
                             <MdAccountCircle />
-                            <span>Profile</span>
+                            <span>Account</span>
                           </NavLink>
 
                           <button 
@@ -399,11 +399,11 @@ const NavBar = () => {
                           >
                             <ul className="flex flex-col gap-2 pl-2 text-sm text-gray-600">
                               <NavLink 
-                                to="/profile"
+                                to="/account"
                                 className="flex items-center gap-1 tracking-wide text-gray-700 hover:text-gray-900"
                               >
                                 <MdAccountCircle />
-                                <span>Profile</span>
+                                <span>Account</span>
                               </NavLink>
 
                               <button 
