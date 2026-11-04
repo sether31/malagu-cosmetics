@@ -17,9 +17,9 @@ export const authService = {
     return api.post("/auth/google-auth.php", { code });
   },
   logout: () => {
-    return api.post("/auth/logout.php")
+    return api.post("/auth/logout.php");
   },
   refreshToken: () => {
-    return apiPrivate.post("/auth/refresh-token.php")
+    return apiPrivate.post("/auth/refresh-token.php");
   }
 }
