@@ -16,5 +16,8 @@ export const userService = {
   },
   verifyEmailUpdate: (data: { new_email: string, otp: string }) => {
     return apiPrivate.post("/account/verify-email-update.php", data);
+  },
+  changePassword: (data: { current_password: string, new_password: string }) => {
+    return apiPrivate.post("/account/update-password.php", data);
   }
 }

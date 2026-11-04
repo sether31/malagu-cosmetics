@@ -8,11 +8,11 @@ import { toast } from "react-toastify";
 import { getImageUrl } from "../../utils/getImageUrl";
 import { userService } from "../../services/userService";
 import OTPInput from "react-otp-input";
+import { FaCheck, FaRegEye, FaRegEyeSlash, FaXmark } from "react-icons/fa6";
 
 const Account = () => {
   const { user, checkAuth } = useAuthStore();
 
-  // profile info
   const [profileForm, setProfileForm] = useState({
     name: "",
     profilePicture: null as File | string | null,
@@ -21,12 +21,25 @@ const Account = () => {
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [isProfileSubmitting, setIsProfileSubmitting] = useState<boolean>(false);
 
-  // --- Section 2: Email Update State ---
   const [newEmail, setNewEmail] = useState<string>("");
   const [emailStep, setEmailStep] = useState<"form" | "otp">("form");
   const [emailOtp, setEmailOtp] = useState<string>("");
   const [emailError, setEmailError] = useState<string>("");
   const [isEmailSubmitting, setIsEmailSubmitting] = useState<boolean>(false);
+
+  const [isPasswordOpen, setIsPasswordOpen] = useState<boolean>(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
+
+  const [passwordForm, setPasswordForm] = useState<PasswordFormType>({
+    currentPassword: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const [passwordErrors, setPasswordErrors] = useState<PasswordErrorType>({});
+  const [isPasswordSubmitting, setIsPasswordSubmitting] = useState<boolean>(false);
 
   useEffect(() => {
     if (user) {
@@ -39,6 +52,7 @@ const Account = () => {
     }
   }, [user]);
 
+  // profile
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, files } = e.target;
 
@@ -89,6 +103,7 @@ const Account = () => {
     }
   };
 
+  // email
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewEmail(e.target.value);
   };
@@ -146,11 +161,81 @@ const Account = () => {
     }
   }
 
+  // password
+  const validatePasswordForm = (data: PasswordFormType) => {
+    const validateErrors: PasswordErrorType = {};
+
+    // Check Current Password
+    if (!data.currentPassword) {
+      validateErrors.currentPassword = "Current Password is required.";
+    }
+
+    // Check New Password
+    if (!data.password) {
+      validateErrors.password = "Password is required.";
+    } else if (data.password.length < 8) {
+      validateErrors.password = "Password must be at least 8 characters.";
+    }
+
+    // Check Confirm Password
+    if (!data.confirmPassword) {
+      validateErrors.confirmPassword = "Confirm Password is required.";
+    } else if (data.password !== data.confirmPassword) {
+      validateErrors.confirmPassword = "Passwords do not match.";
+    }
+
+    return validateErrors;
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    const updatedForm = {
+      ...passwordForm,
+      [name]: value,
+    };
+
+    setPasswordForm(updatedForm);
+    setPasswordErrors(validatePasswordForm(updatedForm));
+  };
+
+  const handlePasswordSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const validate = validatePasswordForm(passwordForm);
+    setPasswordErrors(validate);
+
+    if (Object.keys(validate).length > 0) {
+      toast.error("Please fix the errors before submitting.");
+      return;
+    }
+
+    setIsPasswordSubmitting(true);
+
+    try {
+      const res = await userService.changePassword({
+        current_password: passwordForm.currentPassword,
+        new_password: passwordForm.password,
+      });
+
+      if (res.data.success) {
+        toast.success(res.data.message || "Password updated successfully!");
+        setPasswordForm({ currentPassword: "", password: "", confirmPassword: "" });
+        setPasswordErrors({});
+        setIsPasswordOpen(false);
+      }
+    } catch (error) {
+      console.log("Error: ", error)
+    } finally {
+      setIsPasswordSubmitting(false);
+    }
+  };
+
   return (
     <div className="flex flex-col container-md gap-8 px-4 py-10 mx-auto">
       <h1 className="text-2xl font-bold text-primary">Account Settings</h1>
 
-      {/* Section 1: Personal Info (Name & Profile Picture) */}
+      {/* user profile */}
       <div className="p-6 border border-gray-300 rounded-md shadow-sm bg-bgColor">
         <h2 className="mb-4 text-lg font-semibold">Personal Information</h2>
         
@@ -194,7 +279,7 @@ const Account = () => {
         </form>
       </div>
 
-      {/* Section 2: Email Update */}
+      {/* email */}
       <div className="p-6 border border-gray-300 rounded-md shadow-sm bg-bgColor">
         <h2 className="mb-4 text-lg font-semibold">Email Address</h2>
         
@@ -260,19 +345,118 @@ const Account = () => {
         )}
       </div>
 
-      {/* Section 3: Security */}
-      <div className="flex items-center justify-between p-6 border border-gray-300 rounded-md shadow-sm bg-bgColor">
+      {/* password */}
+      <div className="p-6 border border-gray-300 rounded-md shadow-sm bg-bgColor">
+      <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold">Password</h2>
           <p className="text-sm text-gray-600">Update your password to keep your account secure.</p>
         </div>
-        <button 
+        <button
           type="button"
-          className="px-4 py-2 text-sm text-white rounded-md cursor-pointer bg-primary hover:opacity-90"
+          onClick={() => {
+            setIsPasswordOpen(!isPasswordOpen);
+            setPasswordForm({ currentPassword: "", password: "", confirmPassword: "" });
+            setPasswordErrors({});
+          }}
+          className="px-4 py-2 text-sm text-white rounded-md cursor-pointer bg-primary hover:opacity-90 transition-all"
         >
-          Change Password
+          {isPasswordOpen ? "Cancel" : "Change Password"}
         </button>
       </div>
+
+      {isPasswordOpen && (
+        <form onSubmit={handlePasswordSubmit} className="mt-6 space-y-4 pt-4 border-t border-gray-200">
+          <Input
+            id="currentPassword"
+            name="currentPassword"
+            label={<span>Current Password <span className="text-red-500">*</span></span>}
+            type={showCurrentPassword ? "text" : "password"}
+            placeholder="Enter your current password"
+            value={passwordForm.currentPassword}
+            onChange={handlePasswordChange}
+            error={passwordErrors.currentPassword}
+            rightIcon={
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  className="cursor-pointer"
+                >
+                  {showCurrentPassword ? <FaRegEye /> : <FaRegEyeSlash />}
+                </button>
+              </div>
+            }
+          />
+
+          <Input
+            id="password"
+            name="password"
+            label={<span>New Password <span className="text-red-500">*</span></span>}
+            type={showPassword ? "text" : "password"}
+            placeholder="Must be at least 8 characters long"
+            value={passwordForm.password}
+            onChange={handlePasswordChange}
+            error={passwordErrors.password}
+            rightIcon={
+              <div className="flex items-center gap-1">
+                {passwordForm.password.length > 0 && (
+                  passwordErrors.password ? (
+                    <span className="text-red-500"><FaXmark /></span>
+                  ) : (
+                    <span className="text-green-500"><FaCheck /></span>
+                  )
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="cursor-pointer"
+                >
+                  {showPassword ? <FaRegEye /> : <FaRegEyeSlash />}
+                </button>
+              </div>
+            }
+          />
+
+          <Input
+            id="confirmPassword"
+            name="confirmPassword"
+            label={<span>Confirm Password <span className="text-red-500">*</span></span>}
+            type={showConfirmPassword ? "text" : "password"}
+            placeholder="Confirm your new password"
+            value={passwordForm.confirmPassword}
+            onChange={handlePasswordChange}
+            error={passwordErrors.confirmPassword}
+            rightIcon={
+              <div className="flex items-center gap-1">
+                {passwordForm.confirmPassword.length > 0 && (
+                  passwordErrors.confirmPassword ? (
+                    <span className="text-red-500"><FaXmark /></span>
+                  ) : (
+                    <span className="text-green-500"><FaCheck /></span>
+                  )
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="cursor-pointer"
+                >
+                  {showConfirmPassword ? <FaRegEye /> : <FaRegEyeSlash />}
+                </button>
+              </div>
+            }
+          />
+
+          <Button
+            type="submit"
+            className="py-2"
+            disabled={isPasswordSubmitting}
+          >
+            {isPasswordSubmitting ? "Updating Password..." : "Update Password"}
+          </Button>
+        </form>
+      )}
+    </div>
     </div>
   );
 };
