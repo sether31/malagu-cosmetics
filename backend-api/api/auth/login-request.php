@@ -33,14 +33,13 @@ try {
   $check_user->execute([":email" => $email]);
   $user = $check_user->fetch();
 
-
-  $verify_password = password_verify($password, $user["password"]);
-
   if (!$user) {
     http_response_code(400);
-    echo json_encode(["success" => false, "message" => "Email doesn't exist.", "errors" => ["email" => "Email doesn't exist.",]]);
+    echo json_encode(["success" => false, "message" => "Email doesn't exist.", "errors" => ["email" => "Email doesn't exist."]]);
     exit;
   }
+
+  $verify_password = password_verify($password, $user["password"]);
 
   if (!password_verify($password, $user["password"])) {
     http_response_code(400);
