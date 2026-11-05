@@ -1,6 +1,6 @@
 import React from "react"
 import { motion } from "framer-motion"
-import HeroImage from "../../../assets/landing-page/hero-image/hero-img.jpg"
+import HeroImage from "../../../assets/landing-page/hero-image/hero-img.png"
 import { Button } from "../../../components/Button"
 
 const containerVariants = {
