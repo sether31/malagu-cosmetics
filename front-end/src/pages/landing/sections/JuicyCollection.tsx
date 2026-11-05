@@ -3,6 +3,7 @@ import { motion } from "motion/react"
 import { api } from "../../../api/api"
 import ProductCard, { type ProductProps } from "../../../components/ProductCard"
 import { MdKeyboardDoubleArrowRight } from "react-icons/md"
+import ProductSkeleton from "../../../components/ProductSkeleton"
 
 
 const containerVariants = {
@@ -29,9 +30,11 @@ const cardVariants = {
 
 const JuicyCollection = () => {
   const [products, setProducts] = useState<ProductProps[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const getProducts = async () => {
+      setIsLoading(true);
       try {
         const res = await api.get('/products/get-products.php', {
           params: {
@@ -43,7 +46,9 @@ const JuicyCollection = () => {
         
         setProducts(res.data.data)
       } catch (error) {
-        console.log(`Error: ${error.message}`);
+        console.log(`Error:`, error);
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -57,12 +62,16 @@ const JuicyCollection = () => {
         The Juicy Collections
       </h1>
 
-      {products.length > 0 && (
+      {isLoading ? (
+        <div className="mt-10">
+          <ProductSkeleton length={4} />
+        </div>
+      ): (
         <motion.div 
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true , margin: "-50px"}}
+          viewport={{ once: true, margin: "-50px"}}
           className="flex gap-4 mt-10 overflow-x-auto snap-x snap-mandatory pb-4 
                   lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0 
                   scrollbar-width:none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
