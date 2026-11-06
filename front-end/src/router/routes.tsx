@@ -7,6 +7,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import Login from "../pages/auth/Login";
 import ProductDetails from "../pages/product/ProductDetails";
 import Account from "../pages/account/Account";
+import ForgotPassword from "../pages/auth/ForgotPassword";
 
 export const routes = createBrowserRouter([
   {
@@ -46,5 +47,9 @@ export const routes = createBrowserRouter([
         <Login  />
       </GoogleOAuthProvider>
     )
+  },
+  {
+    path: "/forgot-password",
+    element: <ForgotPassword />
   }
 ]);
