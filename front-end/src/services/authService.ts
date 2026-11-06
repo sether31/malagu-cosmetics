@@ -19,6 +19,12 @@ export const authService = {
   logout: () => {
     return api.post("/auth/logout.php");
   },
+  requestPasswordReset: (email: string) => {
+    return api.post("/auth/request-reset-password.php", { email });
+  },
+  verifyPasswordReset: (data: {email: string, otp: string, new_password: string}) => {
+    return api.post("/auth/verify-reset-password.php", data);
+  },
   refreshToken: () => {
     return apiPrivate.post("/auth/refresh-token.php");
   }
