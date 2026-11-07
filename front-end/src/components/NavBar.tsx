@@ -12,6 +12,7 @@ import { useCategoryStore } from "../store/useCategoryStore";
 import Cart from "./Cart";
 import { useAuthStore } from "../store/useAuthStore";
 import { toast } from "react-toastify";
+import SearchInput from "./SearchInput";
 
 const NavItem = ({ to, children }: { to: string; children: React.ReactNode }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -178,43 +179,7 @@ const NavBar = () => {
 
             {/* right section nav */}
             <div className="flex items-center gap-6">
-              <form onSubmit={handleSearch} className="relative border-b border-gray-400 pt-3 pb-1.5 px-2 flex items-center min-w-[210px]">
-                <input
-                  type="text"
-                  id="search"
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
-                  onFocus={() => setIsSearchFocused(true)}
-                  onBlur={() => setIsSearchFocused(false)}
-                  className="z-10 w-full pr-12 text-xs bg-transparent outline-none text-primary"
-                />
-
-                <motion.label
-                  htmlFor="search"
-                  className="absolute left-0 z-0 text-gray-800 pointer-events-none"
-                  initial={false}
-                  animate={{
-                    y: isLabelFloating ? -18 : 0,
-                    fontSize: isLabelFloating ? "10px" : "12px",
-                  }}
-                  transition={{ duration: 0.2, ease: "easeOut" }}
-                >
-                  What are you looking for?
-                </motion.label>
-
-                <div className="absolute right-0 flex items-center gap-1.5 z-10">
-                  <AnimatePresence>
-                    {searchValue && (
-                      <motion.button type="button" className="cursor-pointer" onClick={() => setSearchValue("")}>
-                        <IoMdClose className="text-lg" />
-                      </motion.button>
-                    )}
-                  </AnimatePresence>
-                  <button type="submit" className="flex items-center focus:outline-none">
-                    <IoSearch className="text-2xl text-gray-800 cursor-pointer shrink-0" />
-                  </button>
-                </div>
-              </form>
+              <SearchInput containerClassName="min-w-[220px]" limit={5} debounceMs={300} />
 
               {isAuthenticated ? (
                 <div
@@ -247,7 +212,7 @@ const NavBar = () => {
                           <button 
                             type="button"
                             onClick={() => handleLogout()}
-                            className="flex items-center gap-1 text-sm tracking-wide text-gray-700 hover:text-gray-900"
+                            className="flex items-center gap-1 text-sm tracking-wide text-gray-700 cursor-pointer hover:text-gray-900"
                           >
                             <RiLogoutCircleLine />
                             <span>Logout</span>
@@ -316,6 +281,10 @@ const NavBar = () => {
                   className="text-3xl text-gray-800 cursor-pointer" 
                   onClick={() => setIsMobileMenuOpen(false)} 
                 />
+              </div>
+
+              <div className="mb-6">
+                <SearchInput containerClassName="w-full" limit={10} debounceMs={300} />
               </div>
 
               {/* links */}
@@ -408,7 +377,7 @@ const NavBar = () => {
 
                               <button 
                                 onClick={() => handleLogout()}
-                                className="flex items-center gap-1 tracking-wide text-gray-700 hover:text-gray-900"
+                                className="flex items-center gap-1 tracking-wide text-gray-700 cursor-pointer hover:text-gray-900"
                               >
                                 <RiLogoutCircleLine />
                                 <span>Logout</span>
