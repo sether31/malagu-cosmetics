@@ -8,6 +8,7 @@ import Login from "../pages/auth/Login";
 import ProductDetails from "../pages/product/ProductDetails";
 import Account from "../pages/account/Account";
 import ForgotPassword from "../pages/auth/ForgotPassword";
+import ShadeGuide from "../pages/shade-guide/ShadeGuide";
 
 export const routes = createBrowserRouter([
   {
@@ -29,6 +30,10 @@ export const routes = createBrowserRouter([
       {
         path: "/account",
         element: <Account />
+      },
+      {
+        path: "/shade-guide",
+        element: <ShadeGuide />
       }
     ],
   },
