@@ -52,14 +52,17 @@ const ProductCard = ({ product }: { product: ProductProps }) => {
       </Link>
 
       <div className="flex flex-col justify-between flex-1 px-4 pt-2 pb-4 bg-surface">
+        <div className="flex items-start justify-between gap-2 mb-1">
+          <p className="text-xs tracking-wider uppercase text-primary/70">{product.sub_category}</p>
+          <p className="text-sm font-semibold text-gray-900">₱{product.price}</p>
+        </div>
+
         <Link
           to={urlSlug}
-          className="font-serif text-lg font-semibold leading-tight line-clamp-2"
+          className="font-serif text-base font-semibold leading-tight line-clamp-2 hover:underline"
         >
           {product.name}
         </Link>
-
-        <p className="mt-1 text-sm text-primary/70">{product.sub_category}</p>
 
         <div className="flex gap-2 overflow-x-auto overflow-y-hidden flex-nowrap scrollbar-none scroll-width-none p-2 [-ms-webkit-style: none] [&::-webkit-scrollbar]:hidden snap-x snap-mandatory">
           {product.variants.map((variant) => (

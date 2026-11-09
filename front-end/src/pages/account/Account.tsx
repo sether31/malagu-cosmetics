@@ -3,7 +3,6 @@ import NoProfile from "../../assets/no-profile.png";
 import { Button } from "../../components/Button";
 import Input from "../../components/Input";
 import { useAuthStore } from "../../store/useAuthStore";
-import { authService } from "../../services/authService";
 import { toast } from "react-toastify";
 import { getImageUrl } from "../../utils/getImageUrl";
 import { userService } from "../../services/userService";
@@ -32,14 +31,17 @@ const Account = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
 
-  const [passwordForm, setPasswordForm] = useState<PasswordFormType>({
+  const [passwordForm, setPasswordForm] = useState({
     currentPassword: "",
     password: "",
     confirmPassword: "",
   });
 
-  const [passwordErrors, setPasswordErrors] = useState<PasswordErrorType>({});
+  const [passwordErrors, setPasswordErrors] = useState<{ [key: string]: string }>({});
   const [isPasswordSubmitting, setIsPasswordSubmitting] = useState<boolean>(false);
+
+  // Check if user has an existing password (defaults to true if property is missing)
+  const hasExistingPassword = (user as any)?.has_password ?? true;
 
   useEffect(() => {
     if (user) {
@@ -90,7 +92,7 @@ const Account = () => {
         formData.append("profile_picture", profileForm.profilePicture);
       }
 
-      const res = await authService.updateUserProfile(formData); 
+      const res = await userService.updateUserProfile(formData); 
 
       if (res.data.success) {
         toast.success(res.data.message || "Profile updated successfully!");
@@ -161,23 +163,20 @@ const Account = () => {
     }
   }
 
-  // password
-  const validatePasswordForm = (data: PasswordFormType) => {
-    const validateErrors: PasswordErrorType = {};
+  // password validation
+  const validatePasswordForm = (data: typeof passwordForm) => {
+    const validateErrors: { [key: string]: string } = {};
 
-    // Check Current Password
-    if (!data.currentPassword) {
+    if (hasExistingPassword && !data.currentPassword) {
       validateErrors.currentPassword = "Current Password is required.";
     }
 
-    // Check New Password
     if (!data.password) {
       validateErrors.password = "Password is required.";
     } else if (data.password.length < 8) {
       validateErrors.password = "Password must be at least 8 characters.";
     }
 
-    // Check Confirm Password
     if (!data.confirmPassword) {
       validateErrors.confirmPassword = "Confirm Password is required.";
     } else if (data.password !== data.confirmPassword) {
@@ -189,12 +188,7 @@ const Account = () => {
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
-    const updatedForm = {
-      ...passwordForm,
-      [name]: value,
-    };
-
+    const updatedForm = { ...passwordForm, [name]: value };
     setPasswordForm(updatedForm);
     setPasswordErrors(validatePasswordForm(updatedForm));
   };
@@ -213,19 +207,25 @@ const Account = () => {
     setIsPasswordSubmitting(true);
 
     try {
-      const res = await userService.changePassword({
-        current_password: passwordForm.currentPassword,
+      const payload: any = {
         new_password: passwordForm.password,
-      });
+      };
+
+      if (hasExistingPassword) {
+        payload.current_password = passwordForm.currentPassword;
+      }
+
+      const res = await userService.changePassword(payload);
 
       if (res.data.success) {
-        toast.success(res.data.message || "Password updated successfully!");
+        toast.success(res.data.message || "Password saved successfully!");
         setPasswordForm({ currentPassword: "", password: "", confirmPassword: "" });
         setPasswordErrors({});
         setIsPasswordOpen(false);
+        await checkAuth(); 
       }
-    } catch (error) {
-      console.log("Error: ", error)
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to update password.");
     } finally {
       setIsPasswordSubmitting(false);
     }
@@ -350,7 +350,9 @@ const Account = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold">Password</h2>
-          <p className="text-sm text-gray-600">Update your password to keep your account secure.</p>
+          <p className="text-sm text-gray-600">
+            {hasExistingPassword ? "Update your password to keep your account secure." : "Set a password for your account."}
+          </p>
         </div>
         <button
           type="button"
@@ -361,38 +363,40 @@ const Account = () => {
           }}
           className="px-4 py-2 text-sm text-white rounded-md cursor-pointer bg-primary hover:opacity-90 transition-all"
         >
-          {isPasswordOpen ? "Cancel" : "Change Password"}
+          {isPasswordOpen ? "Cancel" : (hasExistingPassword ? "Change Password" : "Set Password")}
         </button>
       </div>
 
       {isPasswordOpen && (
         <form onSubmit={handlePasswordSubmit} className="mt-6 space-y-4 pt-4 border-t border-gray-200">
-          <Input
-            id="currentPassword"
-            name="currentPassword"
-            label={<span>Current Password <span className="text-red-500">*</span></span>}
-            type={showCurrentPassword ? "text" : "password"}
-            placeholder="Enter your current password"
-            value={passwordForm.currentPassword}
-            onChange={handlePasswordChange}
-            error={passwordErrors.currentPassword}
-            rightIcon={
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                  className="cursor-pointer"
-                >
-                  {showCurrentPassword ? <FaRegEye /> : <FaRegEyeSlash />}
-                </button>
-              </div>
-            }
-          />
+          {hasExistingPassword && (
+            <Input
+              id="currentPassword"
+              name="currentPassword"
+              label={<span>Current Password <span className="text-red-500">*</span></span>}
+              type={showCurrentPassword ? "text" : "password"}
+              placeholder="Enter your current password"
+              value={passwordForm.currentPassword}
+              onChange={handlePasswordChange}
+              error={passwordErrors.currentPassword}
+              rightIcon={
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    className="cursor-pointer"
+                  >
+                    {showCurrentPassword ? <FaRegEye /> : <FaRegEyeSlash />}
+                  </button>
+                </div>
+              }
+            />
+          )}
 
           <Input
             id="password"
             name="password"
-            label={<span>New Password <span className="text-red-500">*</span></span>}
+            label={<span>{hasExistingPassword ? "New Password" : "Password"} <span className="text-red-500">*</span></span>}
             type={showPassword ? "text" : "password"}
             placeholder="Must be at least 8 characters long"
             value={passwordForm.password}
@@ -423,7 +427,7 @@ const Account = () => {
             name="confirmPassword"
             label={<span>Confirm Password <span className="text-red-500">*</span></span>}
             type={showConfirmPassword ? "text" : "password"}
-            placeholder="Confirm your new password"
+            placeholder="Confirm your password"
             value={passwordForm.confirmPassword}
             onChange={handlePasswordChange}
             error={passwordErrors.confirmPassword}
@@ -452,7 +456,7 @@ const Account = () => {
             className="py-2"
             disabled={isPasswordSubmitting}
           >
-            {isPasswordSubmitting ? "Updating Password..." : "Update Password"}
+            {isPasswordSubmitting ? "Saving Password..." : (hasExistingPassword ? "Update Password" : "Set Password")}
           </Button>
         </form>
       )}

@@ -7,9 +7,9 @@ $data = json_decode(file_get_contents("php://input"), true);
 $current_password = $data["current_password"] ?? "";
 $new_password = $data["new_password"] ?? "";
 
-if (empty($current_password) || empty($new_password)) {
+if (empty($new_password)) {
   http_response_code(400);
-  echo json_encode(["success" => false, "message" => "All password fields are required."]);
+  echo json_encode(["success" => false, "message" => "New password is required."]);
   exit();
 }
 
@@ -26,10 +26,18 @@ try {
     exit();
   }
 
-  if (!password_verify($current_password, $user["password"])) {
-    http_response_code(400);
-    echo json_encode(["success" => false, "message" => "Incorrect current password."]);
-    exit();
+  if (!empty($user["password"])) {
+    if (empty($current_password)) {
+      http_response_code(400);
+      echo json_encode(["success" => false, "message" => "Current password is required."]);
+      exit();
+    }
+
+    if (!password_verify($current_password, $user["password"])) {
+      http_response_code(400);
+      echo json_encode(["success" => false, "message" => "Incorrect current password."]);
+      exit();
+    }
   }
 
   $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
@@ -40,9 +48,11 @@ try {
     ":user_id" => $user_id
   ]);
 
+  $message = empty($user["password"]) ? "Password set successfully!" : "Password updated successfully!";
+
   echo json_encode([
     "success" => true,
-    "message" => "Password updated successfully!"
+    "message" => $message
   ]);
 } catch (\Throwable $th) {
   http_response_code(500);
