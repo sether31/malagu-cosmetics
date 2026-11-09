@@ -37,7 +37,8 @@ try {
       if (move_uploaded_file($fileTmpPath, $dest_path)) {
         $uploaded_pp_path = "/uploads/user/" . $newFileName;
 
-        if (!empty($user["profile_picture"])) {
+        // Safely delete old local image if it exists and isn't a Google URL
+        if (!empty($user["profile_picture"]) && strpos($user["profile_picture"], "/uploads/") === 0) {
           $oldFileServerPath = __DIR__ . "/../.." . $user["profile_picture"];
           if (file_exists($oldFileServerPath)) {
             @unlink($oldFileServerPath);

@@ -27,7 +27,10 @@ try {
 
   $google_client = new Google\Service\Oauth2($client);
   $user_info = $google_client->userinfo->get();
+
   $user_email = $user_info->email;
+  $user_name = $user_info->name ?? null;
+  $user_picture = $user_info->picture ?? null;
 
   $pdo = (new Database())->pdo;
   $check_email = $pdo->prepare("SELECT * FROM user_tb WHERE email = :email LIMIT 1");
@@ -41,8 +44,12 @@ try {
     $user_id = $user["user_id"];
     $message = "Login Successfully!";
   } else {
-    $stmt = $pdo->prepare("INSERT INTO user_tb (email) VALUES (:email)");
-    $stmt->execute([":email" => $user_email]);
+    $stmt = $pdo->prepare("INSERT INTO user_tb (email, full_name, profile_picture) VALUES (:email, :name, :picture)");
+    $stmt->execute([
+      ":email" => $user_email,
+      ":name" => $user_name,
+      ":picture" => $user_picture
+    ]);
     $user_id = $pdo->lastInsertId();
     $message = "Register Successfully!";
   }
@@ -50,7 +57,7 @@ try {
   $jwt = new JwtHandler($_ENV["JWT_SECRET_KEY"]);
   $token = $jwt->generateToken($user_id);
 
-  setcookie("refresh_token", $token["refresh_token"], time() + 120, "/", "", false, true);
+  setcookie("refresh_token", $token["refresh_token"], time() + 604800, "/", "", false, true);
 
   echo json_encode([
     "success" => true,

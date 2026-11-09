@@ -1,75 +1,52 @@
-# React + TypeScript + Vite
+# Malagu Cosmetics
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Malagu Cosmetics is a modern, full-stack e-commerce catalog web application built to deliver a seamless beauty shopping experience with dynamic multi-level filtering, persistent category states, secure Google OAuth & JWT authentication, and smart cart session handling.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## How Malagu Cosmetics Works
 
-## React Compiler
+- **Shoppers (Frontend UI):** Users explore a curated beauty catalog, filter products through persistent main categories (_Eyes, Face, Lips_) and subcategories (_Eyeliner, Lip Oil, etc._), sort by price, and manage their shopping session.
+- **Authentication, JWT & Cart Sync:** Users authenticate securely via Google Cloud OAuth, which issues a secure **JWT (JSON Web Token)** for stateless API authorization. When a guest logs in, their temporary local cart seamlessly merges into their user account's active database cart (or initializes a new one if none exists).
+- **Backend & Database (PHP / MySQL):** Powers product data retrieval, catalog queries, JWT validation middleware, user sessions, and cart storage.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## System Structure
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+<pre>
+malagu-cosmetics/
+├── 📁 front-end/        # React & TypeScript client application
+│   ├── 📁 src/
+│   │   ├── 📁 api/      # Axios client configurations & interceptors
+│   │   ├── 📁 layouts/  # Structural page layouts & wrappers
+│   │   ├── 📁 pages/    # Route views 
+│   │   ├── 📁 services/ # API service abstractions
+│   │   ├── 📁 store/    # Global state management
+│   │   ├── 📁 utils/    # Helper utilities 
+│   │   ├── App.tsx      # Main application router
+│   │   └── main.tsx     # App entry point
+│   └── index.html       # HTML with SEO meta tags & favicon
+└── backend-api/         # PHP / MySQL backend endpoints 
+</pre>
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Key Features
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Catalog & Dynamic Filtering
 
-```
+- **Persistent Main Categories:** Main category filter pills remain active and highlighted even when granular subcategories are selected, providing clear structural context.
+- **Dynamic Price Sorting:** Single-selection dropdown sorting for _Featured_, _Price: Low to High_, and _Price: High to Low_.
+- **Unified Product Cards:** Restructured layout placing pricing alongside subcategories and titles for a clean, retail-grade presentation.
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+### Smart Cart & Secure Authentication
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- **Guest-to-User Cart Migration:** Automatically merges local guest cart items into the user's active database cart upon successful login, preventing lost selections.
+- **Google OAuth & JWT Protection:** Configured via Google Cloud Console under the "Malagu Cosmetics" app identity, paired with JWT-secured API endpoints for safe, authenticated transactions and session handling.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Tech Stack & Tools
 
-```
+- **Frontend:** React (Vite), TypeScript, Tailwind CSS, React Router DOM, Motion (Framer Motion)
+- **Backend & Database:** PHP, MySQL, Firebase JWT (`firebase/php-jwt`)
+- **Tools & Protocols:** Git, NPM, Vite, Composer, Google Cloud Console (OAuth)
