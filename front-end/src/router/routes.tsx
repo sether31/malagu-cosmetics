@@ -9,6 +9,7 @@ import ProductDetails from "../pages/product/ProductDetails";
 import Account from "../pages/account/Account";
 import ForgotPassword from "../pages/auth/ForgotPassword";
 import ShadeGuide from "../pages/shade-guide/ShadeGuide";
+import FAQ from "../pages/Faq/Faq";
 
 export const routes = createBrowserRouter([
   {
@@ -34,6 +35,10 @@ export const routes = createBrowserRouter([
       {
         path: "/shade-guide",
         element: <ShadeGuide />
+      },
+      {
+        path: "/frequently-asked-question",
+        element: <FAQ />
       }
     ],
   },
