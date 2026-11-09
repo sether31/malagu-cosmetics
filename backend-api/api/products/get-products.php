@@ -9,6 +9,8 @@ try {
   $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
   $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 8;
 
+  $sort = $_GET['sort'] ?? '';
+
   if ($page < 1) $page = 1;
   if ($limit < 1) $limit = 8;
 
@@ -34,6 +36,13 @@ try {
     $where_sql = "WHERE " . implode(" AND ", $where_clause);
   }
 
+  $order_sql = "ORDER BY id DESC";
+  if ($sort === 'price_low') {
+    $order_sql = "ORDER BY price ASC";
+  } elseif ($sort === 'price_high') {
+    $order_sql = "ORDER BY price DESC";
+  }
+
   $stmt = $pdo->prepare("SELECT COUNT(*) FROM products_tb $where_sql");
   $stmt->execute($params);
   $total_products = (int)$stmt->fetchColumn();
@@ -46,7 +55,7 @@ try {
     FROM (
       SELECT * FROM products_tb 
       $where_sql
-      ORDER by id DESC
+      $order_sql
       LIMIT :limit OFFSET :offset
     ) p 
     LEFT JOIN product_variants_tb v ON p.id = v.product_id
