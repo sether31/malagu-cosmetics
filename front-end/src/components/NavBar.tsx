@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { FaUser } from "react-icons/fa6";
 import { GiShoppingBag } from "react-icons/gi";
-import { IoSearch } from "react-icons/io5";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { IoMdClose } from "react-icons/io";
 import { RxHamburgerMenu } from "react-icons/rx";
@@ -50,8 +49,6 @@ const NavBar = () => {
   const { fetchCategories, categories: categoryData } = useCategoryStore();
 
   // states
-  const [isSearchFocused, setIsSearchFocused] = useState<boolean>(false);
-  const [searchValue, setSearchValue] = useState<string>("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
   
@@ -62,12 +59,11 @@ const NavBar = () => {
   const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState<boolean>(false);
   const [isAccountMobileExpanded, setIsAccountMobileExpanded] = useState<boolean>(false); 
 
-  const isLabelFloating = isSearchFocused || searchValue.trim().length > 0;
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchCategories();
-  }, [fetchCategories])
+  }, [fetchCategories]);
 
   useEffect(() => {
     if (isMobileMenuOpen) {
@@ -76,13 +72,6 @@ const NavBar = () => {
       document.body.style.overflow = "auto";
     }
   }, [isMobileMenuOpen]);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchValue.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchValue.trim())}`);
-    }
-  };
 
   const handleLogout = async () => {
     setIsAccountDropdownOpen(false);
@@ -136,7 +125,7 @@ const NavBar = () => {
                       className="absolute left-0 pt-4 top-full w-max"
                     >
                       <div className="flex gap-8 p-6 border border-gray-300 rounded-md bg-bgColor">
-                        {categoryData.map((categoryObj) => (
+                        {categoryData.map((categoryObj: any) => (
                           <div key={categoryObj.name} className="flex flex-col gap-3 min-w-[120px]">
                             <Link
                               to={`/shop?category=${encodeURIComponent(categoryObj.name)}`}
@@ -147,7 +136,7 @@ const NavBar = () => {
                             </Link>
 
                             <ul className="flex flex-col gap-2 text-sm text-gray-700">
-                              {categoryObj.subCategories.map((subCategory) => (
+                              {(categoryObj.subCategories || categoryObj.subcategories || []).map((subCategory: string) => (
                                 <li key={subCategory}>
                                   <Link
                                     to={`/shop?category=${encodeURIComponent(categoryObj.name)}&sub=${encodeURIComponent(subCategory)}`}
@@ -228,13 +217,11 @@ const NavBar = () => {
                 </NavLink>
               )}
 
-              
               <button onClick={() => setIsCartOpen(!isCartOpen)} className="pt-2 text-gray-800 transition-colors cursor-pointer hover:text-gray-900">
                 <GiShoppingBag className="text-xl" />
               </button>
             </div>
           </nav>
-
 
           {/* mobile */}
           <nav className="flex items-center justify-between gap-4 py-4 lg:hidden">
@@ -311,7 +298,7 @@ const NavBar = () => {
                         exit={{ height: 0, opacity: 0 }}
                         className="flex flex-col gap-5 pl-4 mt-2 overflow-hidden border-l-2 border-gray-200"
                       >
-                        {categoryData.map((categoryObj) => (
+                        {categoryData.map((categoryObj: any) => (
                           <div key={categoryObj.name} className="flex flex-col gap-2">
                             <Link
                               to={`/shop?category=${encodeURIComponent(categoryObj.name)}`}
@@ -321,7 +308,7 @@ const NavBar = () => {
                               {categoryObj.name}
                             </Link>
                             <ul className="flex flex-col gap-2 pl-2 text-sm text-gray-600">
-                              {categoryObj.subCategories.map((sub) => (
+                              {(categoryObj.subCategories || categoryObj.subcategories || []).map((sub: string) => (
                                 <li key={sub}>
                                   <Link
                                     to={`/shop?category=${encodeURIComponent(categoryObj.name)}&sub=${encodeURIComponent(sub)}`}

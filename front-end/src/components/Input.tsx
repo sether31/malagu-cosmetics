@@ -1,5 +1,4 @@
 import { twMerge } from "tailwind-merge";
-import React from "react";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: React.ReactNode;
