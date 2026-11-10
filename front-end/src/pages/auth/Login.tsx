@@ -239,7 +239,7 @@ const Login = () => {
             <form onSubmit={handleSubmit} className="flex flex-col mt-2"> 
               <motion.div variants={itemVariants}>
                 <Input
-                  style="w-sm max-w-sm mb-4"
+                  inputClassName="w-sm max-w-sm mb-4"
                   label={<span>Email</span>}
                   id="email"
                   name="email"
@@ -253,7 +253,7 @@ const Login = () => {
               
               <motion.div variants={itemVariants}>
                 <Input
-                  style="w-sm max-w-sm mb-2"
+                  inputClassName="w-sm max-w-sm mb-2"
                   label={<span>Password</span>}
                   id="password"
                   name="password"

@@ -255,7 +255,7 @@ const Account = () => {
               label="Profile Picture"
               accept="image/*"
               onChange={handleProfileChange}
-              style="cursor-pointer"
+              inputClassName="cursor-pointer"
             />
           </div>
 

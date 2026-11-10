@@ -252,7 +252,7 @@ const Register = () => {
             <form onSubmit={handleSubmit} className="flex flex-col mt-2 space-y-4">
               <motion.div variants={itemVariants}>
                 <Input
-                  style="w-sm max-w-sm"
+                  inputClassName="w-sm max-w-sm"
                   label={<span>Email <span className="text-red-500">*</span></span>}
                   id="email"
                   name="email"
@@ -271,7 +271,7 @@ const Register = () => {
 
               <motion.div variants={itemVariants}>
                 <Input
-                  style="w-sm max-w-sm"
+                  inputClassName="w-sm max-w-sm"
                   label={<span>Password <span className="text-red-500">*</span></span>}
                   id="password"
                   name="password"
@@ -300,7 +300,7 @@ const Register = () => {
 
               <motion.div variants={itemVariants}>
                 <Input
-                  style="w-sm max-w-sm"
+                  inputClassName="w-sm max-w-sm"
                   label={<span>Confirm Password <span className="text-red-500">*</span></span>}
                   id="confirmPassword"
                   name="confirmPassword"
