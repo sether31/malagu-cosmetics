@@ -1,30 +1,31 @@
 import { twMerge } from "tailwind-merge";
+import React from "react";
 
-interface InputProps {
-  id: string;
-  label: React.ReactNode;
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label?: React.ReactNode;
   error?: string;
   rightIcon?: React.ReactNode;
-  style?: string;
+  inputClassName?: string; 
 }
 
+const Input = ({ id, label, error, rightIcon, inputClassName, ...rest }: InputProps) => {
+  const baseClassName = `border rounded-md py-2 px-3 w-full outline-none focus:border-primary ${
+    error ? "border-red-500" : "border-gray-400"
+  }`;
+  const mergedClassName = twMerge(baseClassName, inputClassName);
 
-const Input = ({ id, label, error, rightIcon, style, ...rest}: InputProps) => {
-
-  const className = `border rounded-md py-2 px-3 w-full outline-none focus:border-primary ${
-            error ? "border-red-500" : "border-gray-400"
-          }`
-  const newClassName = twMerge(className, style)
   return (
     <div className="flex flex-col gap-2 relative">
-      <label htmlFor={id} className="text-sm font-medium">
-        {label}
-      </label>
+      {label && (
+        <label htmlFor={id} className="text-sm font-medium">
+          {label}
+        </label>
+      )}
       
       <div className="relative flex items-center">
         <input
           id={id}
-          className={newClassName}
+          className={mergedClassName}
           {...rest}
         />
 
@@ -39,7 +40,7 @@ const Input = ({ id, label, error, rightIcon, style, ...rest}: InputProps) => {
         <span className="text-xs text-red-500">{error}</span>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default Input
+export default Input;
