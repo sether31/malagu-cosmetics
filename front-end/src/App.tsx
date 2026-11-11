@@ -36,7 +36,15 @@ function App() {
   return (
     <>
       <RouterProvider router={routes} />
-      <ToastContainer />
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnHover={false}
+        toastClassName="!w-[calc(100vw-2rem)] sm:!w-[350px] !mx-auto sm:!mx-0 !mt-3 sm:!mt-0 !rounded-lg !text-sm"
+      />
     </>
   )
 }
