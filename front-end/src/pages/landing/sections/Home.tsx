@@ -81,7 +81,7 @@ const Home = () => {
             </Button>
 
             <Button
-              to="/shop"
+              to="/shade-guide"
               variant="outline"
               className="md:px-8 md:py-3.5 px-4 py-2.5"
             >
