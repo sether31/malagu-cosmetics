@@ -4,6 +4,7 @@ import { RouterProvider } from "react-router-dom";
 import { routes } from "./router/routes";
 import { ToastContainer } from "react-toastify";
 import { useCart } from "./store/useCart";
+import { useCategoryStore } from "./store/useCategoryStore";
 
 function App() {
   useEffect(() => {
@@ -25,10 +26,12 @@ function App() {
   }, []);
 
   const { fetchCart } = useCart();
+  const { fetchCategories } = useCategoryStore();
 
   useEffect(() => {
     fetchCart();
-  }, []);
+    fetchCategories();
+  }, [fetchCart, fetchCategories]);
 
   return (
     <>

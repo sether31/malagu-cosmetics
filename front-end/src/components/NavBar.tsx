@@ -46,7 +46,7 @@ const NavItem = ({ to, children }: { to: string; children: React.ReactNode }) =>
 const NavBar = () => {
   // data
   const { isAuthenticated, logout } = useAuthStore();
-  const { fetchCategories, categories: categoryData } = useCategoryStore();
+  const { categories: categoryData } = useCategoryStore();
 
   // states
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
@@ -60,10 +60,6 @@ const NavBar = () => {
   const [isAccountMobileExpanded, setIsAccountMobileExpanded] = useState<boolean>(false); 
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
 
   useEffect(() => {
     if (isMobileMenuOpen) {
