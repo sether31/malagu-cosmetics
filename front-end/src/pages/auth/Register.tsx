@@ -236,7 +236,7 @@ const Register = () => {
             </div>
           </motion.div>
 
-          <div className="flex flex-col justify-center max-w-sm gap-2 px-4 mx-auto">
+          <div className="flex flex-col justify-center w-full max-w-sm gap-2 px-4 mx-auto">
             <motion.div variants={itemVariants}>
               <Link to="/" className="flex flex-col justify-center font-serif tracking-tight text-center">
                 <span className="text-xl font-black tracking-widest text-primary">MALAGU</span>
@@ -252,7 +252,7 @@ const Register = () => {
             <form onSubmit={handleSubmit} className="flex flex-col mt-2 space-y-4">
               <motion.div variants={itemVariants}>
                 <Input
-                  inputClassName="w-sm max-w-sm"
+                  inputClassName="w-full"
                   label={<span>Email <span className="text-red-500">*</span></span>}
                   id="email"
                   name="email"
@@ -271,7 +271,7 @@ const Register = () => {
 
               <motion.div variants={itemVariants}>
                 <Input
-                  inputClassName="w-sm max-w-sm"
+                  inputClassName="w-full"
                   label={<span>Password <span className="text-red-500">*</span></span>}
                   id="password"
                   name="password"
@@ -300,7 +300,7 @@ const Register = () => {
 
               <motion.div variants={itemVariants}>
                 <Input
-                  inputClassName="w-sm max-w-sm"
+                  inputClassName="w-full"
                   label={<span>Confirm Password <span className="text-red-500">*</span></span>}
                   id="confirmPassword"
                   name="confirmPassword"
