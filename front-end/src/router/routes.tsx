@@ -10,6 +10,7 @@ import Account from "../pages/account/Account";
 import ForgotPassword from "../pages/auth/ForgotPassword";
 import ShadeGuide from "../pages/shade-guide/ShadeGuide";
 import FAQ from "../pages/Faq/Faq";
+import NotFound from "../components/NotFound";
 
 export const routes = createBrowserRouter([
   {
@@ -61,5 +62,6 @@ export const routes = createBrowserRouter([
   {
     path: "/forgot-password",
     element: <ForgotPassword />
-  }
+  },
+  { path: "*", element: <NotFound /> }
 ]);
