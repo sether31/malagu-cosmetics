@@ -236,10 +236,10 @@ const Login = () => {
               <p className="text-xs font-light text-gray-500">Please enter your details to sign in.</p>
             </motion.div>
 
-            <form onSubmit={handleSubmit} className="flex flex-col mt-2"> 
-              <motion.div variants={itemVariants}>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-2 mt-2"> 
+              <motion.div variants={itemVariants} className="mb-2">
                 <Input
-                  inputClassName="w-full mb-4"
+                  inputClassName="w-full"
                   label={<span>Email</span>}
                   id="email"
                   name="email"
@@ -253,7 +253,7 @@ const Login = () => {
               
               <motion.div variants={itemVariants}>
                 <Input
-                  inputClassName="w-full mb-2"
+                  inputClassName="w-full"
                   label={<span>Password</span>}
                   id="password"
                   name="password"
