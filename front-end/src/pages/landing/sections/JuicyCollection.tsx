@@ -30,11 +30,10 @@ const cardVariants = {
 
 const JuicyCollection = () => {
   const [products, setProducts] = useState<ProductProps[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const getProducts = async () => {
-      setIsLoading(true);
       try {
         const res = await api.get('/products/get-products.php', {
           params: {
@@ -44,7 +43,7 @@ const JuicyCollection = () => {
           }
         });
         
-        setProducts(res.data.data)
+        setProducts(res.data?.data || []);
       } catch (error) {
         console.log(`Error:`, error);
       } finally {
@@ -62,7 +61,7 @@ const JuicyCollection = () => {
         The Juicy Collections
       </h1>
 
-      {isLoading ? (
+      {isLoading || products.length === 0 ? (
         <div className="mt-10">
           <ProductSkeleton length={4} />
         </div>
@@ -76,7 +75,7 @@ const JuicyCollection = () => {
                   lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0 
                   scrollbar-width:none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
         >
-          {products.map((product) => (
+          {(products || []).map((product) => (
             <motion.div className="min-w-xs lg:min-w-full" key={product.id} variants={cardVariants}>
               <ProductCard product={product} />
             </motion.div>
