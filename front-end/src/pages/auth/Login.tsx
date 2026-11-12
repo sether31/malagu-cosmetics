@@ -42,7 +42,7 @@ const itemVariants = {
     y: 0,
     transition: {
       duration: 0.7,
-      ease: [0.215, 0.61, 0.355, 1],
+      ease: [0.215, 0.61, 0.355, 1] as const,
     },
   },
 }
@@ -54,7 +54,7 @@ const imageVariants = {
     x: 0,
     transition: {
       duration: 1,
-      ease: [0.215, 0.61, 0.355, 1],
+      ease: [0.215, 0.61, 0.355, 1] as const,
     },
   },
 }
@@ -223,7 +223,7 @@ const Login = () => {
             </div>
           </motion.div>
           
-          <div className="flex flex-col justify-center max-w-sm gap-2 px-4 mx-auto">
+          <div className="flex flex-col justify-center w-full max-w-sm gap-2 px-4 mx-auto">
             <motion.div variants={itemVariants}>
               <Link to="/" className="flex flex-col justify-center font-serif tracking-tight text-center">
                 <span className="text-xl font-black tracking-widest text-primary">MALAGU</span>
@@ -236,10 +236,10 @@ const Login = () => {
               <p className="text-xs font-light text-gray-500">Please enter your details to sign in.</p>
             </motion.div>
 
-            <form onSubmit={handleSubmit} className="flex flex-col mt-2"> 
-              <motion.div variants={itemVariants}>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-2 mt-2"> 
+              <motion.div variants={itemVariants} className="mb-2">
                 <Input
-                  style="w-sm max-w-sm mb-4"
+                  inputClassName="w-full"
                   label={<span>Email</span>}
                   id="email"
                   name="email"
@@ -253,7 +253,7 @@ const Login = () => {
               
               <motion.div variants={itemVariants}>
                 <Input
-                  style="w-sm max-w-sm mb-2"
+                  inputClassName="w-full"
                   label={<span>Password</span>}
                   id="password"
                   name="password"
@@ -274,8 +274,8 @@ const Login = () => {
                 />
               </motion.div>
 
-              <motion.div variants={itemVariants} className="w-max ml-auto block mb-4">
-                <Link to="/forgot-password" className="text-xs font-medium text-right hover:opacity-80 ease-in-out duration-300">
+              <motion.div variants={itemVariants} className="block mb-4 ml-auto w-max">
+                <Link to="/forgot-password" className="text-xs font-medium text-right duration-300 ease-in-out hover:opacity-80">
                   Forgot Password?
                 </Link>
               </motion.div>

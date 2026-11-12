@@ -1,9 +1,30 @@
 <?php
 require_once __DIR__ . "/../classes/JwtHandler.php";
 
+if (!function_exists('getRequestHeaders')) {
+  function getRequestHeaders()
+  {
+    if (function_exists('apache_request_headers')) {
+      $headers = apache_request_headers();
+      if ($headers !== false) {
+        return $headers;
+      }
+    }
+
+    $headers = [];
+    foreach ($_SERVER as $key => $value) {
+      if (substr($key, 0, 5) === 'HTTP_') {
+        $headerName = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($key, 5)))));
+        $headers[$headerName] = $value;
+      }
+    }
+    return $headers;
+  }
+}
+
 function getAuthenticatedUserId()
 {
-  $headers = apache_request_headers();
+  $headers = getRequestHeaders();
   $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
 
   if (!preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {

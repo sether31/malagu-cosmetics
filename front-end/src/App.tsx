@@ -4,6 +4,7 @@ import { RouterProvider } from "react-router-dom";
 import { routes } from "./router/routes";
 import { ToastContainer } from "react-toastify";
 import { useCart } from "./store/useCart";
+import { useCategoryStore } from "./store/useCategoryStore";
 
 function App() {
   useEffect(() => {
@@ -25,15 +26,25 @@ function App() {
   }, []);
 
   const { fetchCart } = useCart();
+  const { fetchCategories } = useCategoryStore();
 
   useEffect(() => {
     fetchCart();
-  }, []);
+    fetchCategories();
+  }, [fetchCart, fetchCategories]);
 
   return (
     <>
       <RouterProvider router={routes} />
-      <ToastContainer />
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnHover={false}
+        toastClassName="!w-[calc(100vw-2rem)] sm:!w-[350px] !mx-auto sm:!mx-0 !mt-3 sm:!mt-0 !rounded-lg !text-sm"
+      />
     </>
   )
 }
