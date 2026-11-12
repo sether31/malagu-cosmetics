@@ -21,7 +21,7 @@ const itemVariants = {
     y: 0,
     transition: {
       duration: 0.7,
-      ease: [0.215, 0.61, 0.355, 1],
+      ease: [0.215, 0.61, 0.355, 1] as const,
     },
   },
 }
@@ -33,7 +33,7 @@ const imageVariants = {
     scale: 1,
     transition: {
       duration: 0.9,
-      ease: [0.215, 0.61, 0.355, 1],
+      ease: [0.215, 0.61, 0.355, 1] as const,
     },
   },
 }
@@ -45,6 +45,7 @@ const Banner = () => {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-50px" }}
+        variants={containerVariants}
         className="flex flex-col items-center justify-between md:gap-6 md:flex-row container-xl"
       >
         <div className="flex-1 px-4 pt-20 text-center md:py-20 lg:px-20 xl:px-32 md:text-left">

@@ -1,14 +1,9 @@
-import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useCategoryStore } from "../store/useCategoryStore";
 import { FaInstagram, FaFacebookF, FaTiktok } from "react-icons/fa";
 
 export default function Footer() {
-  const { fetchCategories, categories } = useCategoryStore();
-
-  useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
+  const { categories } = useCategoryStore();
 
   return (
     <footer className="w-full bg-[#121619] text-gray-300 border-t border-gray-800 pt-16 pb-8">

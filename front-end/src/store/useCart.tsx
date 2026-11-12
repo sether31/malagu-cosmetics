@@ -24,7 +24,7 @@ export interface CartStore {
   clearCart: () => void;
 }
 
-const itemTimers: Record<string, NodeJS.Timeout> = {};
+const itemTimers: Record<string, ReturnType<typeof setTimeout>> = {};
 
 export const useCart = create<CartStore>()(
   persist(

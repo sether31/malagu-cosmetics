@@ -2,7 +2,7 @@ import { apiPrivate } from "../api/api";
 
 export const userService = {
   getUserProfile: () => {
-    return apiPrivate.post("/account/get-user.php");
+    return apiPrivate.get("/account/get-user.php");
   },
   updateUserProfile: (formData: FormData) => {
     return apiPrivate.post("/account/update-user-profile.php", formData, {
