@@ -40,19 +40,37 @@ const Account = () => {
   const [passwordErrors, setPasswordErrors] = useState<{ [key: string]: string }>({});
   const [isPasswordSubmitting, setIsPasswordSubmitting] = useState<boolean>(false);
 
-  // Check if user has an existing password (defaults to true if property is missing)
   const hasExistingPassword = (user as any)?.has_password ?? true;
 
   useEffect(() => {
-    if (user) {
-      setProfileForm({
-        name: user.name || "",
-        profilePicture: user.profile_picture || null,
-      });
-      setNewEmail(user.email || "");
-      setPreviewUrl(user.profile_picture || "");
-    }
-  }, [user]);
+    const loadProfile = async () => {
+      try {
+        const res = await userService.getUserProfile();
+        if (res.data?.success && res.data?.user) {
+          const u = res.data.user;
+          setProfileForm({
+            name: u.name || "",
+            profilePicture: u.profile_picture || null,
+          });
+          setNewEmail(u.email || "");
+          setPreviewUrl(u.profile_picture || "");
+        }
+      } catch (error) {
+        console.error("Failed to load user profile:", error);
+        // Fallback to Zustand store user if API fails
+        if (user) {
+          setProfileForm({
+            name: user.name || "",
+            profilePicture: user.profile_picture || null,
+          });
+          setNewEmail(user.email || "");
+          setPreviewUrl(user.profile_picture || "");
+        }
+      }
+    };
+
+    loadProfile();
+  }, []);
 
   // profile
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -232,7 +250,7 @@ const Account = () => {
   };
 
   return (
-    <div className="flex flex-col container-md gap-8 px-4 py-10 mx-auto">
+    <div className="flex flex-col gap-8 px-4 py-10 mx-auto container-md">
       <h1 className="text-2xl font-bold text-primary">Account Settings</h1>
 
       {/* user profile */}
@@ -241,7 +259,7 @@ const Account = () => {
         
         <form onSubmit={handleProfileSubmit} className="space-y-4">
           <div className="flex flex-col gap-4">
-            <div className="block w-40 h-40 mx-auto overflow-hidden border-3 border-emerald-600 rounded-full">
+            <div className="block w-40 h-40 mx-auto overflow-hidden rounded-full border-3 border-emerald-600">
               <img 
                 className="object-cover w-full h-full" 
                 src={previewUrl ? (previewUrl.startsWith("blob:") ? previewUrl : getImageUrl(previewUrl)) : NoProfile} 
@@ -326,7 +344,7 @@ const Account = () => {
             />
 
             <div className="flex flex-col w-full gap-2 pt-2">
-              <Button onClick={handleVerifyEmailOtp} className="py-2 rounded-md w-max mx-auto" disabled={isEmailSubmitting}>
+              <Button onClick={handleVerifyEmailOtp} className="py-2 mx-auto rounded-md w-max" disabled={isEmailSubmitting}>
                 {isEmailSubmitting ? "Verifying..." : "Verify & Save Email"}
               </Button>
               
@@ -336,7 +354,7 @@ const Account = () => {
                   setEmailStep("form");
                   setEmailOtp("");
                 }}
-                className="text-sm text-gray-500 transition-colors cursor-pointer hover:text-black w-max mx-auto"
+                className="mx-auto text-sm text-gray-500 transition-colors cursor-pointer hover:text-black w-max"
               >
                 Cancel / Change Email
               </button>
@@ -361,14 +379,14 @@ const Account = () => {
             setPasswordForm({ currentPassword: "", password: "", confirmPassword: "" });
             setPasswordErrors({});
           }}
-          className="px-4 py-2 text-sm text-white rounded-md cursor-pointer bg-primary hover:opacity-90 transition-all"
+          className="px-4 py-2 text-sm text-white transition-all rounded-md cursor-pointer bg-primary hover:opacity-90"
         >
           {isPasswordOpen ? "Cancel" : (hasExistingPassword ? "Change Password" : "Set Password")}
         </button>
       </div>
 
       {isPasswordOpen && (
-        <form onSubmit={handlePasswordSubmit} className="mt-6 space-y-4 pt-4 border-t border-gray-200">
+        <form onSubmit={handlePasswordSubmit} className="pt-4 mt-6 space-y-4 border-t border-gray-200">
           {hasExistingPassword && (
             <Input
               id="currentPassword"
