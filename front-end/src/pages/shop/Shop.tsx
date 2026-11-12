@@ -61,8 +61,8 @@ const Shop = () => {
           }
         });
 
-        setProducts(res.data.data);
-        setTotalPages(res.data.pagination.totalPages);
+        setProducts(res.data?.data || []);
+        setTotalPages(res.data?.pagination?.totalPages || 1);
       } catch (error) {
         console.error("Error fetching products:", error);
       } finally {
@@ -209,8 +209,8 @@ const Shop = () => {
           animate="visible"
           className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
         >
-          {products.length > 0 ? (
-            products.map((product, index) => (
+          {(products || []).length > 0 ? (
+            (products || []).map((product, index) => (
               <motion.div 
                 key={`${index}-${category}-${subCategory}-${sortOption}-${currentPage}`}
                 variants={cardVariants}
