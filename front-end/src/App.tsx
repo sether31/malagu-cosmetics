@@ -1,5 +1,5 @@
 import Lenis from "lenis";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { RouterProvider } from "react-router-dom";
 import { routes } from "./router/routes";
 import { ToastContainer } from "react-toastify";
@@ -28,10 +28,23 @@ function App() {
   const { fetchCart } = useCart();
   const { fetchCategories } = useCategoryStore();
 
+  const [isInitialized, setIsInitialized] = useState(false);
+
   useEffect(() => {
-    fetchCart();
-    fetchCategories();
+    Promise.all([fetchCart(), fetchCategories()]).finally(() => {
+      setIsInitialized(true);
+    });
   }, [fetchCart, fetchCategories]);
+
+  if (!isInitialized) {
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center w-screen min-h-screen gap-4 bg-white">
+      <div
+        className="w-12 h-12 border-4 rounded-full border-stone-200 border-t-secondary animate-spin"
+      />
+    </div>
+  );
+}
 
   return (
     <>
